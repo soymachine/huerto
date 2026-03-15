@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>El Huerto</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:         #F5F0E4;
+      --bg-mid:     #EDE5D0;
+      --bg-dark:    #DDD0B8;
+      --green:      #3A6020;
+      --green-mid:  #527A30;
+      --green-pale: #DFF0CC;
+      --terra:      #B04A28;
+      --terra-pale: #F5D0C0;
+      --text:       #2A2010;
+      --muted:      #7A6A50;
+      --border:     #C5B89A;
+      --cell-bg-empty:  #FDFAF4;
+      --cell-bg-filled: #EFF8E4;
+      --summer-tab: #FBF0CC;
+      --summer-text:#7A4A10;
+      --winter-tab: #D8E8F5;
+      --winter-text:#1A3C5A;
+      --cell-size:  118px;
+      --radius:     6px;
+      --season-bg-summer: #F5F0E4;
+      --season-bg-winter: #EBF0F7;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Lato', sans-serif;
+      font-weight: 400;
+      font-size: 15px;
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 52px 40px 80px;
+      transition: background 0.4s ease;
+    }
+
+    .wrap {
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    body.winter {
+      background: var(--season-bg-winter);
+      --bg: #EBF0F7;
+      --bg-mid: #DDEAF5;
+      --bg-dark: #C8DAEC;
+      --cell-bg-empty: #F4F8FC;
+      --cell-bg-filled: #DDF0F8;
+    }
+
+    /* ─── HEADER ─── */
+    .page-header {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      padding-bottom: 28px;
+      border-bottom: 1.5px solid var(--border);
+      margin-bottom: 40px;
+    }
+
+    .header-left h1 {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 4rem;
+      font-weight: 500;
+      line-height: 0.9;
+      letter-spacing: -0.02em;
+      color: var(--green);
+    }
+
+    .header-left p {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: 1.15rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    .header-meta {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      text-align: right;
+    }
+
+    /* ─── CONTROLS ─── */
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin-bottom: 36px;
+      background: white;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      width: fit-content;
+      box-shadow: 0 2px 8px rgba(42,32,16,0.06);
+    }
+
+    .ctrl-block {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      padding: 14px 28px;
+    }
+
+    .ctrl-block + .ctrl-block {
+      border-left: 1.5px solid var(--border);
+    }
+
+    .ctrl-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    /* Year */
+    .year-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .year-btn {
+      width: 30px; height: 30px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      color: var(--text);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s;
+      font-family: 'Lato', sans-serif;
+    }
+    .year-btn:hover { background: var(--bg-mid); border-color: var(--green); }
+
+    .year-val {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 2rem;
+      font-weight: 500;
+      min-width: 64px;
+      text-align: center;
+      color: var(--text);
+    }
+
+    /* Season */
+    .season-row {
+      display: flex;
+      gap: 6px;
+    }
+
+    .season-btn {
+      padding: 7px 18px;
+      border: 1.5px solid var(--border);
+      background: transparent;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: 'Lato', sans-serif;
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--muted);
+      transition: all 0.2s;
+      display: flex; align-items: center; gap: 5px;
+    }
+    .season-btn:hover { background: var(--bg-mid); }
+    .season-btn.active[data-s="summer"] {
+      background: var(--summer-tab);
+      border-color: #D4A020;
+      color: var(--summer-text);
+    }
+    .season-btn.active[data-s="winter"] {
+      background: var(--winter-tab);
+      border-color: #4A80B0;
+      color: var(--winter-text);
+    }
+
+    /* Grid size */
+    .size-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .size-field {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .size-sublabel {
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .size-inp {
+      width: 52px;
+      padding: 6px 8px;
+      border: 1.5px solid var(--border);
+      border-radius: 5px;
+      background: var(--bg);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      color: var(--text);
+      text-align: center;
+    }
+    .size-inp:focus { outline: none; border-color: var(--green); }
+
+    .size-x { color: var(--muted); font-size: 0.85rem; }
+
+    /* ─── GRID ─── */
+    .grid-scroll {
+      overflow-x: auto;
+      padding-bottom: 8px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 8px;
+      width: fit-content;
+    }
+
+    .cell {
+      width: var(--cell-size);
+      height: var(--cell-size);
+      background: var(--cell-bg-empty);
+      border: 1.5px dashed var(--bg-dark);
+      border-radius: var(--radius);
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      transition: all 0.18s;
+      user-select: none;
+    }
+
+    .cell:hover {
+      border-color: var(--green-mid);
+      border-style: solid;
+      background: var(--green-pale);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(42,32,16,0.1);
+    }
+
+    .cell.has-plant {
+      background: var(--cell-bg-filled);
+      border: 1.5px solid #C0D8A8;
+    }
+
+    .cell.has-plant:hover {
+      background: var(--green-pale);
+      border-color: var(--green-mid);
+    }
+
+    .cell-emoji { font-size: 2.4rem; line-height: 1; pointer-events: none; }
+
+    .cell-name {
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.07em;
+      text-transform: uppercase;
+      color: var(--green);
+      text-align: center;
+      max-width: 96px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+
+    .cell-plus {
+      font-size: 1.4rem;
+      color: var(--bg-dark);
+      line-height: 1;
+      transition: color 0.18s;
+      pointer-events: none;
+    }
+    .cell:hover .cell-plus { color: var(--green-mid); }
+
+    /* ─── MODAL OVERLAY ─── */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(42, 32, 16, 0.38);
+      backdrop-filter: blur(5px);
+      -webkit-backdrop-filter: blur(5px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 200;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.22s;
+    }
+    .overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    /* ─── MODAL ─── */
+    .modal {
+      background: #FDFAF3;
+      border-radius: 14px;
+      padding: 38px 40px;
+      width: 600px;
+      max-height: 82vh;
+      overflow-y: auto;
+      box-shadow: 0 24px 64px rgba(42,32,16,0.22), 0 0 0 1px rgba(197,184,154,0.4);
+      transform: translateY(16px) scale(0.98);
+      transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .overlay.open .modal {
+      transform: translateY(0) scale(1);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+
+    .modal-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.9rem;
+      font-weight: 500;
+      color: var(--green);
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      font-size: 1.3rem;
+      color: var(--muted);
+      padding: 4px 8px;
+      border-radius: 5px;
+      transition: background 0.15s;
+      line-height: 1;
+    }
+    .modal-close:hover { background: var(--bg-mid); color: var(--text); }
+
+    .modal-sub {
+      font-size: 0.82rem;
+      color: var(--muted);
+      margin-bottom: 26px;
+    }
+
+    .modal-cat-label {
+      font-size: 0.63rem;
+      font-weight: 700;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      margin-top: 22px;
+    }
+    .modal-cat-label:first-of-type { margin-top: 0; }
+
+    .plant-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 8px;
+    }
+
+    .plant-opt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 13px 8px 11px;
+      border: 1.5px solid var(--bg-dark);
+      border-radius: var(--radius);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: 'Lato', sans-serif;
+    }
+    .plant-opt:hover {
+      border-color: var(--green-mid);
+      background: var(--green-pale);
+    }
+    .plant-opt.chosen {
+      border-color: var(--green);
+      background: var(--green-pale);
+      box-shadow: inset 0 0 0 1px var(--green);
+    }
+    .plant-opt-emoji { font-size: 1.8rem; }
+    .plant-opt-name {
+      font-size: 0.68rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      letter-spacing: 0.02em;
+    }
+
+    .modal-footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--bg-dark);
+    }
+
+    .btn-remove {
+      padding: 9px 22px;
+      border: 1.5px solid var(--terra);
+      background: transparent;
+      border-radius: var(--radius);
+      color: var(--terra);
+      font-family: 'Lato', sans-serif;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s;
+      letter-spacing: 0.04em;
+    }
+    .btn-remove:hover { background: var(--terra-pale); }
+    .btn-remove:disabled {
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    /* ─── SCROLLBAR ─── */
+    ::-webkit-scrollbar { width: 7px; height: 7px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--bg-dark); border-radius: 4px; }
+
+    /* ─── LEGEND (bottom) ─── */
+    .legend {
+      margin-top: 48px;
+      padding-top: 24px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .legend-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+      margin-right: 4px;
+    }
+
+    .legend-chip {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: var(--muted);
+      background: white;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="wrap">
+  <!-- HEADER -->
+  <header class="page-header">
+    <div class="header-left">
+      <h1>El Huerto</h1>
+      <p>Planificador estacional de cultivos</p>
+    </div>
+    <div class="header-meta" id="headerMeta"></div>
+  </header>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+
+    <!-- Year -->
+    <div class="ctrl-block">
+      <span class="ctrl-label">Año</span>
+      <div class="year-row">
+        <button class="year-btn" id="yearDown" title="Año anterior">−</button>
+        <span class="year-val" id="yearVal"></span>
+        <button class="year-btn" id="yearUp" title="Año siguiente">+</button>
+      </div>
+    </div>
+
+    <!-- Season -->
+    <div class="ctrl-block">
+      <span class="ctrl-label">Temporada</span>
+      <div class="season-row">
+        <button class="season-btn active" data-s="summer" id="btnSummer">☀️ Verano</button>
+        <button class="season-btn" data-s="winter" id="btnWinter">❄️ Invierno</button>
+      </div>
+    </div>
+
+    <!-- Grid size -->
+    <div class="ctrl-block">
+      <span class="ctrl-label">Tamaño de cuadrícula</span>
+      <div class="size-row">
+        <div class="size-field">
+          <span class="size-sublabel">Col.</span>
+          <input class="size-inp" type="number" id="colsInp" value="6" min="1" max="20">
+        </div>
+        <span class="size-x">×</span>
+        <div class="size-field">
+          <span class="size-sublabel">Fil.</span>
+          <input class="size-inp" type="number" id="rowsInp" value="10" min="1" max="30">
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- GRID -->
+  <div class="grid-scroll">
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <!-- LEGEND -->
+  <div class="legend" id="legend">
+    <span class="legend-label">Planted this season:</span>
+  </div>
+
+  </div><!-- /.wrap -->
+
+  <!-- MODAL -->
+  <div class="overlay" id="overlay">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-head">
+        <h2 class="modal-title" id="modalTitle">Elegir una planta</h2>
+        <button class="modal-close" id="modalClose" aria-label="Cerrar">✕</button>
+      </div>
+      <p class="modal-sub" id="modalSub">Haz clic en una planta para asignarla a esta parcela.</p>
+      <div id="modalBody"></div>
+      <div class="modal-footer">
+        <button class="btn-remove" id="btnRemove" disabled>Quitar planta de esta parcela</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ─────────────────────────────────────────────────────────────────
+    // DATA
+    // ─────────────────────────────────────────────────────────────────
+    const PLANTS = {
+      Verduras: [
+        { id: 'tomato',      name: 'Tomate',        emoji: '🍅' },
+        { id: 'chili',       name: 'Chile',         emoji: '🌶️' },
+        { id: 'pepper',      name: 'Pimiento',      emoji: '🫑' },
+        { id: 'zucchini',    name: 'Calabacín',     emoji: '🥒' },
+        { id: 'eggplant',    name: 'Berenjena',     emoji: '🍆' },
+        { id: 'lettuce',     name: 'Lechuga',       emoji: '🥬' },
+        { id: 'carrot',      name: 'Zanahoria',     emoji: '🥕' },
+        { id: 'onion',       name: 'Cebolla',       emoji: '🧅' },
+        { id: 'garlic',      name: 'Ajo',           emoji: '🧄' },
+        { id: 'potato',      name: 'Patata',        emoji: '🥔' },
+        { id: 'corn',        name: 'Maíz',          emoji: '🌽' },
+        { id: 'pumpkin',     name: 'Calabaza',      emoji: '🎃' },
+        { id: 'broccoli',    name: 'Brócoli',       emoji: '🥦' },
+        { id: 'bean',        name: 'Judía',         emoji: '🫘' },
+        { id: 'pea',         name: 'Guisante',      emoji: '🫛' },
+        { id: 'spinach',     name: 'Espinaca',      emoji: '🌿' },
+      ],
+      Frutas: [
+        { id: 'strawberry',  name: 'Fresa',         emoji: '🍓' },
+        { id: 'watermelon',  name: 'Sandía',        emoji: '🍉' },
+        { id: 'melon',       name: 'Melón',         emoji: '🍈' },
+        { id: 'peach',       name: 'Melocotón',     emoji: '🍑' },
+        { id: 'apple',       name: 'Manzana',       emoji: '🍎' },
+        { id: 'pear',        name: 'Pera',          emoji: '🍐' },
+        { id: 'cherry',      name: 'Cereza',        emoji: '🍒' },
+        { id: 'grape',       name: 'Uva',           emoji: '🍇' },
+        { id: 'blueberry',   name: 'Arándano',      emoji: '🫐' },
+        { id: 'lemon',       name: 'Limón',         emoji: '🍋' },
+        { id: 'orange',      name: 'Naranja',       emoji: '🍊' },
+        { id: 'avocado',     name: 'Aguacate',      emoji: '🥑' },
+      ],
+    };
+
+    const ALL_PLANTS = Object.values(PLANTS).flat();
+    function findPlant(id) { return ALL_PLANTS.find(p => p.id === id); }
+
+    // ─────────────────────────────────────────────────────────────────
+    // STATE
+    // ─────────────────────────────────────────────────────────────────
+    let year   = new Date().getFullYear();
+    let season = 'summer';
+    let cols   = 6;
+    let rows   = 10;
+    let activeCell = null; // { r, c }
+
+    // gardenData[seasonKey][cellKey] = plantId
+    // e.g. gardenData["2024-summer"]["2,3"] = "tomato"
+    let gardenData = {};
+
+    function seasonKey() { return `${year}-${season}`; }
+    function cellKey(r, c) { return `${r},${c}`; }
+
+    function getCell(r, c) {
+      return gardenData[seasonKey()]?.[cellKey(r, c)] ?? null;
+    }
+    function setCell(r, c, plantId) {
+      if (!gardenData[seasonKey()]) gardenData[seasonKey()] = {};
+      if (plantId === null) delete gardenData[seasonKey()][cellKey(r, c)];
+      else gardenData[seasonKey()][cellKey(r, c)] = plantId;
+      persist();
+    }
+
+    function persist() {
+      try {
+        localStorage.setItem('el-huerto-v1', JSON.stringify(gardenData));
+        localStorage.setItem('el-huerto-ui', JSON.stringify({ year, season, cols, rows }));
+      } catch(e) {}
+    }
+    function hydrate() {
+      try {
+        const raw = localStorage.getItem('el-huerto-v1');
+        if (raw) gardenData = JSON.parse(raw);
+        const ui = localStorage.getItem('el-huerto-ui');
+        if (ui) {
+          const s = JSON.parse(ui);
+          year   = s.year   ?? year;
+          season = s.season ?? season;
+          cols   = s.cols   ?? cols;
+          rows   = s.rows   ?? rows;
+          document.getElementById('colsInp').value = cols;
+          document.getElementById('rowsInp').value = rows;
+          if (season === 'winter') {
+            document.getElementById('btnWinter').classList.add('active');
+            document.getElementById('btnSummer').classList.remove('active');
+          }
+        }
+      } catch(e) {}
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // RENDER
+    // ─────────────────────────────────────────────────────────────────
+    function renderAll() {
+      renderHeader();
+      renderGrid();
+      renderLegend();
+    }
+
+    function renderHeader() {
+      document.getElementById('yearVal').textContent = year;
+      const meta = season === 'summer'
+        ? `☀️ Verano ${year}`
+        : `❄️ Invierno ${year}`;
+      document.getElementById('headerMeta').textContent = meta;
+      document.body.classList.toggle('winter', season === 'winter');
+    }
+
+    function renderGrid() {
+      const grid = document.getElementById('grid');
+      grid.style.gridTemplateColumns = `repeat(${cols}, var(--cell-size))`;
+      grid.innerHTML = '';
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const plantId = getCell(r, c);
+          const plant   = plantId ? findPlant(plantId) : null;
+          const cell    = document.createElement('div');
+          cell.className = `cell${plant ? ' has-plant' : ''}`;
+          cell.title = plant ? plant.name : 'Haz clic para plantar algo aquí';
+          if (plant) {
+            cell.innerHTML =
+              `<span class="cell-emoji">${plant.emoji}</span>` +
+              `<span class="cell-name">${plant.name}</span>`;
+          } else {
+            cell.innerHTML = `<span class="cell-plus">+</span>`;
+          }
+          cell.addEventListener('click', () => openModal(r, c));
+          grid.appendChild(cell);
+        }
+      }
+    }
+
+    function renderLegend() {
+      const legend = document.getElementById('legend');
+      const sk = seasonKey();
+      const planted = gardenData[sk] ? Object.values(gardenData[sk]) : [];
+      const unique = [...new Set(planted)];
+      legend.innerHTML = `<span class="legend-label">Plantado esta temporada:</span>`;
+      if (unique.length === 0) {
+        legend.innerHTML += `<span class="legend-chip">Nada plantado aún</span>`;
+      } else {
+        unique.forEach(id => {
+          const p = findPlant(id);
+          if (p) legend.innerHTML +=
+            `<span class="legend-chip">${p.emoji} ${p.name}</span>`;
+        });
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // MODAL
+    // ─────────────────────────────────────────────────────────────────
+    function openModal(r, c) {
+      activeCell = { r, c };
+      const current = getCell(r, c);
+
+      document.getElementById('modalSub').textContent =
+        `Parcela ${r + 1}–${c + 1}  ·  ${season === 'summer' ? '☀️ Verano' : '❄️ Invierno'} ${year}`;
+
+      let html = '';
+      for (const [cat, plants] of Object.entries(PLANTS)) {
+        html += `<div class="modal-cat-label">${cat}</div>`;
+        html += `<div class="plant-grid">`;
+        plants.forEach(p => {
+          const chosen = p.id === current ? ' chosen' : '';
+          html +=
+            `<button class="plant-opt${chosen}" data-pid="${p.id}">` +
+            `<span class="plant-opt-emoji">${p.emoji}</span>` +
+            `<span class="plant-opt-name">${p.name}</span>` +
+            `</button>`;
+        });
+        html += `</div>`;
+      }
+
+      document.getElementById('modalBody').innerHTML = html;
+      document.getElementById('btnRemove').disabled = !current;
+
+      document.querySelectorAll('.plant-opt').forEach(btn => {
+        btn.addEventListener('click', () => {
+          setCell(activeCell.r, activeCell.c, btn.dataset.pid);
+          closeModal();
+          renderAll();
+        });
+      });
+
+      document.getElementById('overlay').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('overlay').classList.remove('open');
+      activeCell = null;
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // EVENTS
+    // ─────────────────────────────────────────────────────────────────
+    document.getElementById('modalClose').addEventListener('click', closeModal);
+    document.getElementById('overlay').addEventListener('click', e => {
+      if (e.target === document.getElementById('overlay')) closeModal();
+    });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    document.getElementById('btnRemove').addEventListener('click', () => {
+      if (!activeCell) return;
+      setCell(activeCell.r, activeCell.c, null);
+      closeModal();
+      renderAll();
+    });
+
+    document.getElementById('yearDown').addEventListener('click', () => { year--; persist(); renderAll(); });
+    document.getElementById('yearUp').addEventListener('click',   () => { year++; persist(); renderAll(); });
+
+    document.getElementById('btnSummer').addEventListener('click', () => {
+      season = 'summer';
+      document.getElementById('btnSummer').classList.add('active');
+      document.getElementById('btnWinter').classList.remove('active');
+      persist(); renderAll();
+    });
+    document.getElementById('btnWinter').addEventListener('click', () => {
+      season = 'winter';
+      document.getElementById('btnWinter').classList.add('active');
+      document.getElementById('btnSummer').classList.remove('active');
+      persist(); renderAll();
+    });
+
+    function applyGridSize() {
+      const c = parseInt(document.getElementById('colsInp').value);
+      const r = parseInt(document.getElementById('rowsInp').value);
+      cols = Math.max(1, Math.min(20, isNaN(c) ? 6 : c));
+      rows = Math.max(1, Math.min(30, isNaN(r) ? 10 : r));
+      document.getElementById('colsInp').value = cols;
+      document.getElementById('rowsInp').value = rows;
+      persist(); renderAll();
+    }
+    document.getElementById('colsInp').addEventListener('change', applyGridSize);
+    document.getElementById('rowsInp').addEventListener('change', applyGridSize);
+
+    // ─────────────────────────────────────────────────────────────────
+    // INIT
+    // ─────────────────────────────────────────────────────────────────
+    hydrate();
+    renderAll();
+  </script>
+</body>
+</html>
