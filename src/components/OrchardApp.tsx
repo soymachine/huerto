@@ -76,26 +76,35 @@ function OrchardInner() {
   // ── Per-cell warnings for the grid ────────────────────────────────────────
   const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
     const plantId = getCell(r, c);
-    if (!plantId) return { rotation: false, compat: false, hasNote: false };
+    if (!plantId) return { rotation: false, rotationDetail: '', compat: false, compatDetail: '', hasNote: false };
 
     // Rotation check — same botanical family as previous season?
     const prevKey     = getPreviousSeasonKey(year, season);
     const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
     const rotation    = hasRotationIssue(plantId, prevPlantId);
+    const rotationDetail = rotation && prevPlantId
+      ? `↺ ${findPlant(prevPlantId)?.name ?? prevPlantId} (${FAMILY_LABEL[CROP_FAMILY[plantId]] ?? 'misma familia'}) estuvo aquí la temporada anterior`
+      : '';
 
     // Compat check — any incompatible neighbor in the 4 cardinal cells?
-    const info   = PLANT_INFO[plantId];
-    const compat = !!info && (
-      [[-1,0],[1,0],[0,-1],[0,1]].some(([dr, dc]) => {
+    const info = PLANT_INFO[plantId];
+    const incompatibleNeighbors: string[] = [];
+    if (info) {
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr, dc]) => {
         const nId = getCell(r + dr, c + dc);
-        if (!nId) return false;
-        return info.avoid.includes(nId) || PLANT_INFO[nId]?.avoid.includes(plantId);
-      })
-    );
+        if (!nId) return;
+        if (info.avoid.includes(nId) || PLANT_INFO[nId]?.avoid.includes(plantId)) {
+          const name = findPlant(nId)?.name;
+          if (name && !incompatibleNeighbors.includes(name)) incompatibleNeighbors.push(name);
+        }
+      });
+    }
+    const compat       = incompatibleNeighbors.length > 0;
+    const compatDetail = compat ? `! Incompatible con: ${incompatibleNeighbors.join(', ')}` : '';
 
     const hasNote = !!(notesData[seasonKey]?.[`${r},${c}`]);
 
-    return { rotation, compat, hasNote };
+    return { rotation, rotationDetail, compat, compatDetail, hasNote };
   }, [getCell, gardenData, notesData, year, season, seasonKey]);
 
   // ── Warnings for the active cell (shown inside PlantModal) ───────────────

@@ -288,7 +288,7 @@ body.winter {
   display: flex;
   justify-content: center;
   gap: 3px;
-  pointer-events: none;
+  pointer-events: none;   /* container passes through clicks to the cell */
 }
 
 .cbadge {
@@ -301,10 +301,62 @@ body.winter {
   font-size: 0.55rem;
   font-weight: 900;
   line-height: 1;
+  pointer-events: auto;   /* badges themselves capture hover */
+  cursor: default;
+  position: relative;
+  z-index: 10;
 }
 .cbadge-rot    { background: #FFF0D0; color: #C87A00; border: 1px solid #F0B040; }
 .cbadge-compat { background: #FFE8E8; color: #C83030; border: 1px solid #F09090; }
 .cbadge-note   { background: #E8F0FF; color: #3060C8; border: 1px solid #90B0F0; }
+
+/* ── Badge tooltips ── */
+.cbadge[data-tooltip]::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(30, 22, 10, 0.92);
+  color: #FAF8F3;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  line-height: 1.45;
+  white-space: normal;
+  width: max-content;
+  max-width: 200px;
+  text-align: left;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  transform: translateX(-50%) translateY(4px);
+  z-index: 150;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+}
+/* arrow */
+.cbadge[data-tooltip]::before {
+  content: '';
+  position: absolute;
+  bottom: calc(100% + 2px);
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: rgba(30, 22, 10, 0.92);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+  z-index: 150;
+}
+.cbadge[data-tooltip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+.cbadge[data-tooltip]:hover::before {
+  opacity: 1;
+}
 
 .cell-plus {
   font-size: 1.4rem;

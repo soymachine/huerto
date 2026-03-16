@@ -1,9 +1,11 @@
 import { findPlant } from '../data/plants';
 
 export interface CellWarnings {
-  rotation: boolean;
-  compat:   boolean;
-  hasNote:  boolean;
+  rotation:       boolean;
+  rotationDetail: string;   // e.g. "Tomate (Solanácea) estuvo aquí la temporada anterior"
+  compat:         boolean;
+  compatDetail:   string;   // e.g. "Incompatible con: Cebolla, Ajo"
+  hasNote:        boolean;
 }
 
 interface Props {
@@ -48,19 +50,19 @@ export default function Grid({ rows, cols, getCell, getCellWarnings, onCellClick
                   {warnings.rotation && (
                     <span
                       className="cbadge cbadge-rot"
-                      title="Rotación: misma familia botánica que la temporada anterior"
+                      data-tooltip={warnings.rotationDetail}
                     >↺</span>
                   )}
                   {warnings.compat && (
                     <span
                       className="cbadge cbadge-compat"
-                      title="Incompatibilidad con una planta vecina"
+                      data-tooltip={warnings.compatDetail}
                     >!</span>
                   )}
                   {warnings.hasNote && (
                     <span
                       className="cbadge cbadge-note"
-                      title="Esta parcela tiene notas"
+                      data-tooltip="Esta parcela tiene notas"
                     >✎</span>
                   )}
                 </div>
