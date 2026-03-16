@@ -1,13 +1,20 @@
 import { findPlant } from '../data/plants';
 
+export interface CellWarnings {
+  rotation: boolean;
+  compat:   boolean;
+  hasNote:  boolean;
+}
+
 interface Props {
   rows: number;
   cols: number;
-  getCell: (r: number, c: number) => string | null;
-  onCellClick: (cell: { r: number; c: number }) => void;
+  getCell:         (r: number, c: number) => string | null;
+  getCellWarnings: (r: number, c: number) => CellWarnings;
+  onCellClick:     (cell: { r: number; c: number }) => void;
 }
 
-export default function Grid({ rows, cols, getCell, onCellClick }: Props) {
+export default function Grid({ rows, cols, getCell, getCellWarnings, onCellClick }: Props) {
   return (
     <div
       className="grid"
@@ -15,8 +22,10 @@ export default function Grid({ rows, cols, getCell, onCellClick }: Props) {
     >
       {Array.from({ length: rows }, (_, r) =>
         Array.from({ length: cols }, (_, c) => {
-          const plantId = getCell(r, c);
-          const plant   = plantId ? findPlant(plantId) : null;
+          const plantId  = getCell(r, c);
+          const plant    = plantId ? findPlant(plantId) : null;
+          const warnings = getCellWarnings(r, c);
+
           return (
             <div
               key={`${r}-${c}`}
@@ -31,6 +40,30 @@ export default function Grid({ rows, cols, getCell, onCellClick }: Props) {
                 </>
               ) : (
                 <span className="cell-plus">+</span>
+              )}
+
+              {/* ── Warning / note badges ── */}
+              {(warnings.rotation || warnings.compat || warnings.hasNote) && (
+                <div className="cell-badges">
+                  {warnings.rotation && (
+                    <span
+                      className="cbadge cbadge-rot"
+                      title="Rotación: misma familia botánica que la temporada anterior"
+                    >↺</span>
+                  )}
+                  {warnings.compat && (
+                    <span
+                      className="cbadge cbadge-compat"
+                      title="Incompatibilidad con una planta vecina"
+                    >!</span>
+                  )}
+                  {warnings.hasNote && (
+                    <span
+                      className="cbadge cbadge-note"
+                      title="Esta parcela tiene notas"
+                    >✎</span>
+                  )}
+                </div>
               )}
             </div>
           );

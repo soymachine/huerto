@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { GardenData } from './storage';
+import type { GardenData, NotesData } from './storage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +20,16 @@ export interface Planting {
   row_idx: number;
   col_idx: number;
   plant_id: string;
+}
+
+export interface DbNote {
+  id: string;
+  garden_id: string;
+  year: number;
+  season: string;
+  row_idx: number;
+  col_idx: number;
+  content: string;
 }
 
 // ─── Garden ───────────────────────────────────────────────────────────────────
@@ -75,14 +85,7 @@ export async function upsertPlanting(
   plantId: string,
 ): Promise<void> {
   await supabase.from('plantings').upsert(
-    {
-      garden_id: gardenId,
-      year,
-      season,
-      row_idx: rowIdx,
-      col_idx: colIdx,
-      plant_id: plantId,
-    },
+    { garden_id: gardenId, year, season, row_idx: rowIdx, col_idx: colIdx, plant_id: plantId },
     { onConflict: 'garden_id,year,season,row_idx,col_idx' },
   );
 }
@@ -100,7 +103,47 @@ export async function removePlanting(
     .match({ garden_id: gardenId, year, season, row_idx: rowIdx, col_idx: colIdx });
 }
 
-// ─── Migration ────────────────────────────────────────────────────────────────
+// ─── Notes ────────────────────────────────────────────────────────────────────
+
+export async function fetchNotes(gardenId: string): Promise<DbNote[]> {
+  const { data } = await supabase
+    .from('notes')
+    .select('*')
+    .eq('garden_id', gardenId);
+  return (data ?? []) as DbNote[];
+}
+
+export async function upsertNote(
+  gardenId: string,
+  year: number,
+  season: string,
+  rowIdx: number,
+  colIdx: number,
+  content: string,
+): Promise<void> {
+  if (!content.trim()) {
+    // Empty note → delete it
+    await supabase
+      .from('notes')
+      .delete()
+      .match({ garden_id: gardenId, year, season, row_idx: rowIdx, col_idx: colIdx });
+    return;
+  }
+  await supabase.from('notes').upsert(
+    {
+      garden_id: gardenId,
+      year,
+      season,
+      row_idx: rowIdx,
+      col_idx: colIdx,
+      content,
+      updated_at: new Date().toISOString(),
+    },
+    { onConflict: 'garden_id,year,season,row_idx,col_idx' },
+  );
+}
+
+// ─── Migrations ───────────────────────────────────────────────────────────────
 
 export async function migrateLocalData(
   gardenId: string,
@@ -131,6 +174,36 @@ export async function migrateLocalData(
   }
 }
 
+export async function migrateLocalNotes(
+  gardenId: string,
+  localNotes: NotesData,
+): Promise<void> {
+  const inserts: object[] = [];
+
+  for (const [sk, cells] of Object.entries(localNotes)) {
+    const [yearStr, season] = sk.split('-');
+    const year = parseInt(yearStr);
+    for (const [ck, content] of Object.entries(cells)) {
+      if (!content.trim()) continue;
+      const [rowStr, colStr] = ck.split(',');
+      inserts.push({
+        garden_id: gardenId,
+        year,
+        season,
+        row_idx: parseInt(rowStr),
+        col_idx: parseInt(colStr),
+        content,
+      });
+    }
+  }
+
+  if (inserts.length > 0) {
+    await supabase
+      .from('notes')
+      .upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
+  }
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function plantingsToGardenData(plantings: Planting[]): GardenData {
@@ -139,6 +212,16 @@ export function plantingsToGardenData(plantings: Planting[]): GardenData {
     const sk = `${p.year}-${p.season}`;
     if (!result[sk]) result[sk] = {};
     result[sk][`${p.row_idx},${p.col_idx}`] = p.plant_id;
+  }
+  return result;
+}
+
+export function dbNotesToNotesData(notes: DbNote[]): NotesData {
+  const result: NotesData = {};
+  for (const n of notes) {
+    const sk = `${n.year}-${n.season}`;
+    if (!result[sk]) result[sk] = {};
+    result[sk][`${n.row_idx},${n.col_idx}`] = n.content;
   }
   return result;
 }

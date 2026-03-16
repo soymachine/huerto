@@ -1,6 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider } from '../context/AuthContext';
 import { useGardenData } from '../hooks/useGardenData';
+import { findPlant } from '../data/plants';
+import { PLANT_INFO } from '../data/plantInfo';
+import {
+  CROP_FAMILY,
+  FAMILY_LABEL,
+  getPreviousSeasonKey,
+  hasRotationIssue,
+} from '../data/cropFamilies';
+import type { CellWarnings } from './Grid';
+import type { RotationWarning, CompatWarning } from './PlantModal';
 import Controls   from './Controls';
 import Grid       from './Grid';
 import PlantModal from './PlantModal';
@@ -24,12 +34,14 @@ export default function OrchardApp() {
 function OrchardInner() {
   const {
     gardenData,
+    notesData,
     year,   setYear,
     season, setSeason,
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
     setCell,
+    setNote,
   } = useGardenData();
 
   const [activeCell,    setActiveCell]    = useState<{ r: number; c: number } | null>(null);
@@ -54,16 +66,77 @@ function OrchardInner() {
 
   // ── Helpers ───────────────────────────────────────────────────────────────
   const seasonKey    = `${year}-${season}`;
-  const getCell      = (r: number, c: number) => gardenData[seasonKey]?.[`${r},${c}`] ?? null;
+  const getCell      = useCallback(
+    (r: number, c: number) => gardenData[seasonKey]?.[`${r},${c}`] ?? null,
+    [gardenData, seasonKey],
+  );
   const currentPlant = activeCell ? getCell(activeCell.r, activeCell.c) : null;
   const planted      = gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : [];
 
-  if (!ready) {
-    return (
-      <div className="app-loading">
-        <span>Cargando el huerto…</span>
-      </div>
+  // ── Per-cell warnings for the grid ────────────────────────────────────────
+  const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
+    const plantId = getCell(r, c);
+    if (!plantId) return { rotation: false, compat: false, hasNote: false };
+
+    // Rotation check — same botanical family as previous season?
+    const prevKey     = getPreviousSeasonKey(year, season);
+    const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
+    const rotation    = hasRotationIssue(plantId, prevPlantId);
+
+    // Compat check — any incompatible neighbor in the 4 cardinal cells?
+    const info   = PLANT_INFO[plantId];
+    const compat = !!info && (
+      [[-1,0],[1,0],[0,-1],[0,1]].some(([dr, dc]) => {
+        const nId = getCell(r + dr, c + dc);
+        if (!nId) return false;
+        return info.avoid.includes(nId) || PLANT_INFO[nId]?.avoid.includes(plantId);
+      })
     );
+
+    const hasNote = !!(notesData[seasonKey]?.[`${r},${c}`]);
+
+    return { rotation, compat, hasNote };
+  }, [getCell, gardenData, notesData, year, season, seasonKey]);
+
+  // ── Warnings for the active cell (shown inside PlantModal) ───────────────
+  const rotationWarning = useMemo((): RotationWarning | null => {
+    if (!activeCell || !currentPlant) return null;
+    const { r, c } = activeCell;
+    const prevKey     = getPreviousSeasonKey(year, season);
+    const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
+    if (!hasRotationIssue(currentPlant, prevPlantId) || !prevPlantId) return null;
+    return {
+      prevPlantName: findPlant(prevPlantId)?.name ?? prevPlantId,
+      familyLabel:   FAMILY_LABEL[CROP_FAMILY[currentPlant]] ?? '',
+    };
+  }, [activeCell, currentPlant, gardenData, year, season]);
+
+  const compatWarnings = useMemo((): CompatWarning[] => {
+    if (!activeCell || !currentPlant) return [];
+    const { r, c } = activeCell;
+    const info = PLANT_INFO[currentPlant];
+    if (!info) return [];
+    const seen = new Set<string>();
+    return [[-1,0],[1,0],[0,-1],[0,1]]
+      .map(([dr, dc]) => getCell(r + dr, c + dc))
+      .filter((nId): nId is string => {
+        if (!nId || seen.has(nId)) return false;
+        seen.add(nId);
+        return info.avoid.includes(nId) || !!(PLANT_INFO[nId]?.avoid.includes(currentPlant));
+      })
+      .map(id => {
+        const p = findPlant(id);
+        return p ? { id: p.id, name: p.name, emoji: p.emoji } : null;
+      })
+      .filter((x): x is CompatWarning => x !== null);
+  }, [activeCell, currentPlant, getCell]);
+
+  const activeNote = activeCell
+    ? (notesData[seasonKey]?.[`${activeCell.r},${activeCell.c}`] ?? '')
+    : '';
+
+  if (!ready) {
+    return <div className="app-loading"><span>Cargando el huerto…</span></div>;
   }
 
   return (
@@ -96,7 +169,13 @@ function OrchardInner() {
 
       {/* ── Grid ── */}
       <div className="grid-scroll">
-        <Grid rows={rows} cols={cols} getCell={getCell} onCellClick={setActiveCell} />
+        <Grid
+          rows={rows}
+          cols={cols}
+          getCell={getCell}
+          getCellWarnings={getCellWarnings}
+          onCellClick={setActiveCell}
+        />
       </div>
 
       {/* ── Legend ── */}
@@ -113,8 +192,12 @@ function OrchardInner() {
             season={season}
             year={year}
             currentPlant={currentPlant}
+            note={activeNote}
+            rotationWarning={rotationWarning}
+            compatWarnings={compatWarnings}
             onSelect={plantId => { setCell(activeCell.r, activeCell.c, plantId); setActiveCell(null); }}
             onRemove={() =>       { setCell(activeCell.r, activeCell.c, null);   setActiveCell(null); }}
+            onNoteChange={text => setNote(activeCell.r, activeCell.c, text)}
             onClose={() => setActiveCell(null)}
           />
         )}
