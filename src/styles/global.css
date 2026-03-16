@@ -1379,6 +1379,42 @@ body.winter {
   font-style: italic;
 }
 
+/* ── Family overlay legend (below the grid) ── */
+.family-legend {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding: 12px 16px;
+  background: var(--bg-mid);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+.family-legend-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+  flex-shrink: 0;
+}
+.family-legend-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  color: var(--text);
+  border: 1px solid rgba(42,32,16,0.12);
+}
+.family-legend-chip strong {
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+
 /* Family overlay cell style */
 .cell.family-mode {
   border-style: solid;

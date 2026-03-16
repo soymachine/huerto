@@ -3,7 +3,7 @@ import { AuthProvider }   from '../context/AuthContext';
 import { useGardenData }  from '../hooks/useGardenData';
 import { findPlant }      from '../data/plants';
 import { PLANT_INFO }     from '../data/plantInfo';
-import { CROP_FAMILY, FAMILY_LABEL, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
+import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, FAMILY_LABEL, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
 import type { CellWarnings }            from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
 import Controls       from './Controls';
@@ -70,6 +70,13 @@ function OrchardInner() {
   );
   const currentPlant = activeCell ? getCell(activeCell.r, activeCell.c) : null;
   const planted      = gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : [];
+
+  // Unique botanical families present in this season (for the overlay legend)
+  const activeFamilies = useMemo(() => {
+    const seen = new Set<string>();
+    planted.forEach(id => { const f = CROP_FAMILY[id]; if (f) seen.add(f); });
+    return [...seen].sort((a, b) => (FAMILY_LABEL[a] ?? a).localeCompare(FAMILY_LABEL[b] ?? b));
+  }, [planted]);
 
   // ── Per-cell warnings ─────────────────────────────────────────────────────
   const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
@@ -221,6 +228,23 @@ function OrchardInner() {
               onCellClick={setActiveCell}
             />
           </div>
+
+          {/* Family overlay legend */}
+          {showFamilies && activeFamilies.length > 0 && (
+            <div className="family-legend">
+              <span className="family-legend-title">Familias botánicas</span>
+              {activeFamilies.map(family => (
+                <span
+                  key={family}
+                  className="family-legend-chip"
+                  style={{ background: FAMILY_COLOR[family] ?? '#eee' }}
+                >
+                  <strong>{FAMILY_ABBR[family]}</strong>
+                  {FAMILY_LABEL[family]}
+                </span>
+              ))}
+            </div>
+          )}
 
           <Legend planted={planted} />
         </>
