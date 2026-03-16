@@ -241,6 +241,14 @@ body.winter {
   gap: 5px;
   transition: all 0.18s;
   user-select: none;
+  position: relative;
+  z-index: 0;
+}
+
+/* Eleva la celda sobre sus vecinas cuando un badge tiene hover,
+   evitando que el tooltip quede cortado por las celdas adyacentes */
+.cell:has(.cbadge:hover) {
+  z-index: 100;
 }
 
 .cell:hover {
