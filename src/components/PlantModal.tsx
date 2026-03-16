@@ -1,4 +1,7 @@
+import { useState } from 'react';
 import { PLANTS } from '../data/plants';
+import { PLANT_INFO } from '../data/plantInfo';
+import PlantInfoModal from './PlantInfoModal';
 import type { Season } from '../lib/storage';
 
 interface Props {
@@ -14,6 +17,20 @@ interface Props {
 export default function PlantModal({
   cell, season, year, currentPlant, onSelect, onRemove, onClose,
 }: Props) {
+  const [infoPlantId, setInfoPlantId] = useState<string | null>(null);
+
+  // ── Info view ─────────────────────────────────────────────────────────────
+  if (infoPlantId) {
+    return (
+      <PlantInfoModal
+        plantId={infoPlantId}
+        onBack={() => setInfoPlantId(null)}
+        onClose={onClose}
+      />
+    );
+  }
+
+  // ── Picker view ───────────────────────────────────────────────────────────
   return (
     <div className="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
       <div className="modal-head">
@@ -31,14 +48,28 @@ export default function PlantModal({
             <div className="modal-cat-label">{cat}</div>
             <div className="plant-grid">
               {plants.map(p => (
-                <button
+                <div
                   key={p.id}
                   className={`plant-opt${p.id === currentPlant ? ' chosen' : ''}`}
                   onClick={() => onSelect(p.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={e => e.key === 'Enter' && onSelect(p.id)}
                 >
                   <span className="plant-opt-emoji">{p.emoji}</span>
                   <span className="plant-opt-name">{p.name}</span>
-                </button>
+
+                  {PLANT_INFO[p.id] && (
+                    <button
+                      className="plant-info-btn"
+                      onClick={e => { e.stopPropagation(); setInfoPlantId(p.id); }}
+                      aria-label={`Información sobre ${p.name}`}
+                      tabIndex={-1}
+                    >
+                      ℹ
+                    </button>
+                  )}
+                </div>
               ))}
             </div>
           </div>

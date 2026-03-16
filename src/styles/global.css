@@ -756,3 +756,260 @@ body.winter {
     max-width: calc(100vw - 32px);
   }
 }
+
+/* ═══════════════════════════════════════════════════════
+   PLANT INFO BUTTON (on picker cards)
+═══════════════════════════════════════════════════════ */
+
+.plant-opt {
+  position: relative; /* needed for the info button */
+}
+
+.plant-info-btn {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--bg-dark);
+  border: none;
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 900;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s;
+  line-height: 1;
+  padding: 0;
+  z-index: 2;
+}
+.plant-info-btn:hover {
+  background: var(--green);
+  color: #fff;
+}
+
+/* ═══════════════════════════════════════════════════════
+   PLANT INFO MODAL (ficha de planta)
+═══════════════════════════════════════════════════════ */
+
+.plant-info-modal { max-width: 500px; }
+
+/* Back button */
+.info-back-btn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 0.02em;
+  padding: 0;
+  transition: opacity 0.15s;
+}
+.info-back-btn:hover { opacity: 0.7; }
+
+/* Hero */
+.plant-info-hero {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 20px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.plant-info-emoji {
+  font-size: 3.2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.plant-info-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.1;
+  margin: 0 0 8px;
+}
+
+/* Difficulty badge */
+.difficulty-badge {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.diff-easy { background: #e8f5e9; color: #2e7d32; }
+.diff-mid  { background: #fff8e1; color: #e65100; }
+.diff-hard { background: #fce4ec; color: #c62828; }
+
+/* Stats row */
+.plant-info-stats {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 26px;
+}
+.stat-item {
+  flex: 1;
+  padding: 11px 10px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+}
+.stat-item:last-child { border-right: none; }
+.stat-label {
+  display: block;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.stat-value {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.3;
+}
+
+/* Section */
+.plant-info-section { margin-bottom: 22px; }
+.plant-info-section-title {
+  font-family: 'Lato', sans-serif;
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+/* ── Calendar ── */
+.cal-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+.cal-header,
+.cal-row {
+  display: grid;
+  grid-template-columns: 74px 1fr;
+  gap: 6px;
+  align-items: center;
+}
+.cal-cells {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  gap: 3px;
+}
+.cal-row-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+  text-align: right;
+  padding-right: 4px;
+}
+.cal-header { align-items: end; margin-bottom: 2px; }
+.cal-header .cal-row-label { /* empty spacer */ }
+.cal-month-label {
+  font-size: 0.58rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.cal-cell {
+  height: 13px;
+  border-radius: 3px;
+  background: var(--bg-dark);
+}
+.cal-sow.active        { background: var(--green); }
+.cal-transplant.active { background: #5b8fd4; }
+.cal-harvest.active    { background: #C8880A; }
+
+/* Calendar legend */
+.cal-legend {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+}
+.cal-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+.cal-legend-item::before {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 8px;
+  border-radius: 2px;
+}
+.cal-legend-item.sow::before        { background: var(--green); }
+.cal-legend-item.transplant::before { background: #5b8fd4; }
+.cal-legend-item.harvest::before    { background: #C8880A; }
+
+/* ── Companion pills ── */
+.companion-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.companion-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 11px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+.companion-pill.companion { background: #e8f5e9; color: #2e7d32; }
+.companion-pill.avoid     { background: #fce4ec; color: #c62828; }
+
+/* ── Tip ── */
+.plant-tip {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  background: var(--bg-mid);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 13px 15px;
+  margin-top: 6px;
+}
+.plant-tip-icon { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+.plant-tip p {
+  margin: 0;
+  font-size: 0.84rem;
+  line-height: 1.6;
+  color: var(--muted);
+}
+
+/* ─── RESPONSIVE: plant info ─── */
+@media (max-width: 640px) {
+  .plant-info-modal { max-width: 100%; }
+  .plant-info-name  { font-size: 1.6rem; }
+  .plant-info-emoji { font-size: 2.4rem; }
+  .stat-label       { font-size: 0.55rem; }
+  .stat-value       { font-size: 0.75rem; }
+  .cal-row-label    { font-size: 0.6rem; }
+  .cal-month-label  { font-size: 0.5rem; }
+  .cal-header,
+  .cal-row          { grid-template-columns: 62px 1fr; }
+}
