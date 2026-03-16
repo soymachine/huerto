@@ -785,6 +785,11 @@ body.winter {
   line-height: 1;
   padding: 0;
   z-index: 2;
+  /* Reset iOS/Safari native button appearance */
+  -webkit-appearance: none;
+  appearance: none;
+  -webkit-tap-highlight-color: transparent;
+  font-family: 'Lato', sans-serif;
 }
 .plant-info-btn:hover {
   background: var(--green);
