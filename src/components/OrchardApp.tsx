@@ -1,70 +1,70 @@
 import { useState, useEffect } from 'react';
-import type { Season, GardenData } from '../lib/storage';
-import { loadData, saveData } from '../lib/storage';
-import Controls from './Controls';
-import Grid from './Grid';
+import { AuthProvider } from '../context/AuthContext';
+import { useGardenData } from '../hooks/useGardenData';
+import Controls   from './Controls';
+import Grid       from './Grid';
 import PlantModal from './PlantModal';
-import Legend from './Legend';
+import Legend     from './Legend';
+import UserMenu   from './UserMenu';
+import AuthModal  from './AuthModal';
 import '../styles/global.css';
 
+// ─── Root: wraps everything with the Auth provider ────────────────────────────
+
 export default function OrchardApp() {
-  const [year,       setYear]       = useState(new Date().getFullYear());
-  const [season,     setSeason]     = useState<Season>('summer');
-  const [cols,       setCols]       = useState(6);
-  const [rows,       setRows]       = useState(10);
-  const [gardenData, setGardenData] = useState<GardenData>({});
-  const [activeCell, setActiveCell] = useState<{ r: number; c: number } | null>(null);
-  const [ready,      setReady]      = useState(false);
+  return (
+    <AuthProvider>
+      <OrchardInner />
+    </AuthProvider>
+  );
+}
 
-  // ── Hydrate from localStorage ──────────────────────────────────────
-  useEffect(() => {
-    const { gardenData: gd, ui } = loadData();
-    setGardenData(gd);
-    if (ui) {
-      setYear(ui.year);
-      setSeason(ui.season);
-      setCols(ui.cols);
-      setRows(ui.rows);
-    }
-    setReady(true);
-  }, []);
+// ─── Inner app: has access to AuthContext ─────────────────────────────────────
 
-  // ── Persist to localStorage ────────────────────────────────────────
-  useEffect(() => {
-    if (!ready) return;
-    saveData(gardenData, { year, season, cols, rows });
-  }, [gardenData, year, season, cols, rows, ready]);
+function OrchardInner() {
+  const {
+    gardenData,
+    year,   setYear,
+    season, setSeason,
+    cols,   setCols,
+    rows,   setRows,
+    ready,  syncing,
+    setCell,
+  } = useGardenData();
 
-  // ── Toggle body.winter class ───────────────────────────────────────
+  const [activeCell,    setActiveCell]    = useState<{ r: number; c: number } | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+
+  // ── Winter body class ─────────────────────────────────────────────────────
   useEffect(() => {
     document.body.classList.toggle('winter', season === 'winter');
   }, [season]);
 
-  // ── Escape key closes modal ────────────────────────────────────────
+  // ── Escape key ────────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setActiveCell(null);
+      if (e.key === 'Escape') {
+        setActiveCell(null);
+        setShowAuthModal(false);
+      }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, []);
 
-  // ── Helpers ────────────────────────────────────────────────────────
-  const seasonKey = `${year}-${season}`;
-
-  const getCell = (r: number, c: number): string | null =>
-    gardenData[seasonKey]?.[`${r},${c}`] ?? null;
-
-  const setCell = (r: number, c: number, plantId: string | null) => {
-    setGardenData(prev => {
-      const next = { ...prev, [seasonKey]: { ...(prev[seasonKey] ?? {}) } };
-      if (plantId === null) delete next[seasonKey][`${r},${c}`];
-      else next[seasonKey][`${r},${c}`] = plantId;
-      return next;
-    });
-  };
-
+  // ── Helpers ───────────────────────────────────────────────────────────────
+  const seasonKey    = `${year}-${season}`;
+  const getCell      = (r: number, c: number) => gardenData[seasonKey]?.[`${r},${c}`] ?? null;
   const currentPlant = activeCell ? getCell(activeCell.r, activeCell.c) : null;
+  const planted      = gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : [];
+
+  if (!ready) {
+    return (
+      <div className="app-loading">
+        <span>Cargando el huerto…</span>
+      </div>
+    );
+  }
 
   return (
     <div className="wrap">
@@ -75,17 +75,19 @@ export default function OrchardApp() {
           <h1>El Huerto</h1>
           <p>Planificador estacional de cultivos</p>
         </div>
-        <div className="header-meta">
-          {season === 'summer' ? `☀️ Verano ${year}` : `❄️ Invierno ${year}`}
+        <div className="header-right">
+          <span className="header-meta">
+            {syncing && <span className="sync-dot" title="Guardando…" />}
+            {season === 'summer' ? `☀️ Verano ${year}` : `❄️ Invierno ${year}`}
+          </span>
+          <UserMenu onLoginClick={() => setShowAuthModal(true)} />
         </div>
       </header>
 
       {/* ── Controls ── */}
       <Controls
-        year={year}
-        season={season}
-        cols={cols}
-        rows={rows}
+        year={year}    season={season}
+        cols={cols}    rows={rows}
         onYearChange={setYear}
         onSeasonChange={setSeason}
         onColsChange={setCols}
@@ -94,20 +96,13 @@ export default function OrchardApp() {
 
       {/* ── Grid ── */}
       <div className="grid-scroll">
-        <Grid
-          rows={rows}
-          cols={cols}
-          getCell={getCell}
-          onCellClick={setActiveCell}
-        />
+        <Grid rows={rows} cols={cols} getCell={getCell} onCellClick={setActiveCell} />
       </div>
 
       {/* ── Legend ── */}
-      <Legend
-        planted={gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : []}
-      />
+      <Legend planted={planted} />
 
-      {/* ── Modal overlay ── */}
+      {/* ── Plant picker overlay ── */}
       <div
         className={`overlay${activeCell ? ' open' : ''}`}
         onClick={e => { if (e.target === e.currentTarget) setActiveCell(null); }}
@@ -118,16 +113,20 @@ export default function OrchardApp() {
             season={season}
             year={year}
             currentPlant={currentPlant}
-            onSelect={plantId => {
-              setCell(activeCell.r, activeCell.c, plantId);
-              setActiveCell(null);
-            }}
-            onRemove={() => {
-              setCell(activeCell.r, activeCell.c, null);
-              setActiveCell(null);
-            }}
+            onSelect={plantId => { setCell(activeCell.r, activeCell.c, plantId); setActiveCell(null); }}
+            onRemove={() =>       { setCell(activeCell.r, activeCell.c, null);   setActiveCell(null); }}
             onClose={() => setActiveCell(null)}
           />
+        )}
+      </div>
+
+      {/* ── Auth overlay ── */}
+      <div
+        className={`overlay${showAuthModal ? ' open' : ''}`}
+        onClick={e => { if (e.target === e.currentTarget) setShowAuthModal(false); }}
+      >
+        {showAuthModal && (
+          <AuthModal onClose={() => setShowAuthModal(false)} />
         )}
       </div>
 
