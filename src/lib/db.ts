@@ -32,30 +32,50 @@ export interface DbNote {
   content: string;
 }
 
-// ─── Garden ───────────────────────────────────────────────────────────────────
+// ─── Garden CRUD ──────────────────────────────────────────────────────────────
 
-export async function getOrCreateGarden(
-  userId: string,
-  defaultCols = 6,
-  defaultRows = 10,
-): Promise<Garden> {
-  const { data: existing } = await supabase
+export async function loadAllGardens(userId: string): Promise<Garden[]> {
+  const { data } = await supabase
     .from('gardens')
     .select('*')
     .eq('user_id', userId)
-    .limit(1)
-    .single();
+    .order('created_at', { ascending: true });
+  return (data ?? []) as Garden[];
+}
 
-  if (existing) return existing as Garden;
-
-  const { data: created, error } = await supabase
+export async function createGarden(
+  userId: string,
+  name: string,
+  cols = 6,
+  rows = 10,
+): Promise<Garden> {
+  const { data, error } = await supabase
     .from('gardens')
-    .insert({ user_id: userId, cols: defaultCols, rows: defaultRows })
+    .insert({ user_id: userId, name, cols, rows })
     .select()
     .single();
-
   if (error) throw error;
-  return created as Garden;
+  return data as Garden;
+}
+
+/** Loads all user gardens; creates a default one if none exist yet. */
+export async function loadOrInitGardens(
+  userId: string,
+  defaultCols = 6,
+  defaultRows = 10,
+): Promise<Garden[]> {
+  const existing = await loadAllGardens(userId);
+  if (existing.length > 0) return existing;
+  const garden = await createGarden(userId, 'Mi Huerto', defaultCols, defaultRows);
+  return [garden];
+}
+
+export async function renameGarden(gardenId: string, name: string): Promise<void> {
+  await supabase.from('gardens').update({ name }).eq('id', gardenId);
+}
+
+export async function deleteGarden(gardenId: string): Promise<void> {
+  await supabase.from('gardens').delete().eq('id', gardenId);
 }
 
 export async function updateGardenSize(

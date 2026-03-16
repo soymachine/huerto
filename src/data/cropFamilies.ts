@@ -29,6 +29,34 @@ export const CROP_FAMILY: Record<string, string> = {
   strawberry: 'rosaceae',
 };
 
+// ─── Family display colours (used for the rotation overlay on the grid) ───────
+
+export const FAMILY_COLOR: Record<string, string> = {
+  solanaceae:  '#FFE5D5',
+  cucurbit:    '#FFF5CE',
+  brassica:    '#DFF0D8',
+  apiaceae:    '#D5E8F5',
+  allium:      '#EDE5FA',
+  legume:      '#FAFAD0',
+  asteraceae:  '#FFF8D8',
+  grass:       '#E5F5E5',
+  chenopod:    '#D5F5EC',
+  rosaceae:    '#FAE0E8',
+};
+
+export const FAMILY_ABBR: Record<string, string> = {
+  solanaceae:  'SOL',
+  cucurbit:    'CUC',
+  brassica:    'BRA',
+  apiaceae:    'API',
+  allium:      'ALL',
+  legume:      'LEG',
+  asteraceae:  'AST',
+  grass:       'GRA',
+  chenopod:    'CHE',
+  rosaceae:    'ROS',
+};
+
 export const FAMILY_LABEL: Record<string, string> = {
   solanaceae:  'Solanácea',
   cucurbit:    'Cucurbitácea',
