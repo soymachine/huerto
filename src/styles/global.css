@@ -894,74 +894,51 @@ body.winter {
 }
 
 /* ── Calendar ── */
-.cal-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  margin-bottom: 8px;
-}
-.cal-header,
-.cal-row {
+
+/*
+  Single unified grid: label col + 12 month cols.
+  CalendarRow returns fragments → each cell is a direct grid child → perfect alignment.
+*/
+.cal-table {
   display: grid;
-  grid-template-columns: 74px 1fr;
-  gap: 6px;
+  grid-template-columns: 88px repeat(12, 1fr);
+  gap: 5px 3px;
   align-items: center;
 }
-.cal-cells {
-  display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 3px;
-}
-.cal-row-label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: var(--muted);
-  white-space: nowrap;
-  text-align: right;
-  padding-right: 4px;
-}
-.cal-header { align-items: end; margin-bottom: 2px; }
-.cal-header .cal-row-label { /* empty spacer */ }
-.cal-month-label {
-  font-size: 0.58rem;
+
+/* Month abbreviation header */
+.cal-month-hdr {
+  font-size: 0.6rem;
   font-weight: 700;
   color: var(--muted);
   text-align: center;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.02em;
+  padding-bottom: 4px;
+  border-bottom: 1.5px solid var(--border);
 }
-.cal-cell {
-  height: 13px;
-  border-radius: 3px;
-  background: var(--bg-dark);
-}
-.cal-sow.active        { background: var(--green); }
-.cal-transplant.active { background: #5b8fd4; }
-.cal-harvest.active    { background: #C8880A; }
 
-/* Calendar legend */
-.cal-legend {
-  display: flex;
-  gap: 14px;
-  margin-top: 6px;
-}
-.cal-legend-item {
+/* Row label cell */
+.cal-label-cell {
   display: flex;
   align-items: center;
   gap: 5px;
-  font-size: 0.65rem;
-  font-weight: 600;
-  color: var(--muted);
+  justify-content: flex-end;
+  padding-right: 8px;
+  white-space: nowrap;
 }
-.cal-legend-item::before {
-  content: '';
-  display: inline-block;
-  width: 12px;
-  height: 8px;
-  border-radius: 2px;
+.cal-icon       { font-size: 0.9rem; line-height: 1; }
+.cal-label-text { font-size: 0.7rem; font-weight: 700; color: var(--text); }
+
+/* Month blocks */
+.cal-block {
+  height: 22px;
+  border-radius: 4px;
+  background: var(--bg-dark);
+  transition: opacity 0.1s;
 }
-.cal-legend-item.sow::before        { background: var(--green); }
-.cal-legend-item.transplant::before { background: #5b8fd4; }
-.cal-legend-item.harvest::before    { background: #C8880A; }
+.cal-block.cal-sow        { background: var(--green); }
+.cal-block.cal-transplant { background: #5b8fd4; }
+.cal-block.cal-harvest    { background: #C8880A; }
 
 /* ── Companion pills ── */
 .companion-pills {
@@ -1003,13 +980,16 @@ body.winter {
 
 /* ─── RESPONSIVE: plant info ─── */
 @media (max-width: 640px) {
-  .plant-info-modal { max-width: 100%; }
-  .plant-info-name  { font-size: 1.6rem; }
-  .plant-info-emoji { font-size: 2.4rem; }
-  .stat-label       { font-size: 0.55rem; }
-  .stat-value       { font-size: 0.75rem; }
-  .cal-row-label    { font-size: 0.6rem; }
-  .cal-month-label  { font-size: 0.5rem; }
-  .cal-header,
-  .cal-row          { grid-template-columns: 62px 1fr; }
+  .plant-info-modal  { max-width: 100%; }
+  .plant-info-name   { font-size: 1.6rem; }
+  .plant-info-emoji  { font-size: 2.4rem; }
+  .stat-label        { font-size: 0.55rem; }
+  .stat-value        { font-size: 0.75rem; }
+
+  /* Tighten calendar on mobile */
+  .cal-table         { grid-template-columns: 66px repeat(12, 1fr); gap: 4px 2px; }
+  .cal-label-text    { display: none; }          /* hide text, keep icon */
+  .cal-label-cell    { justify-content: center; padding-right: 0; }
+  .cal-month-hdr     { font-size: 0.52rem; }
+  .cal-block         { height: 18px; }
 }

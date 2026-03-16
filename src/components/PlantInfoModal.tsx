@@ -1,7 +1,8 @@
 import { findPlant } from '../data/plants';
 import { PLANT_INFO, DIFFICULTY_LABEL } from '../data/plantInfo';
 
-const MONTHS = ['E', 'F', 'M', 'A', 'M', 'J', 'J', 'A', 'S', 'O', 'N', 'D'];
+// 3-letter Spanish month abbreviations
+const MONTHS = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
 
 interface Props {
   plantId: string;
@@ -10,24 +11,29 @@ interface Props {
 }
 
 interface RowProps {
+  icon: string;
   label: string;
   months: number[];
   type: 'sow' | 'transplant' | 'harvest';
 }
 
-function CalendarRow({ label, months, type }: RowProps) {
+// Each row returns 13 siblings (label + 12 blocks) that live
+// directly inside the parent CSS-grid — perfect alignment guaranteed.
+function CalendarRow({ icon, label, months, type }: RowProps) {
   return (
-    <div className="cal-row">
-      <span className="cal-row-label">{label}</span>
-      <div className="cal-cells">
-        {Array.from({ length: 12 }, (_, i) => (
-          <span
-            key={i}
-            className={`cal-cell cal-${type}${months.includes(i + 1) ? ' active' : ''}`}
-          />
-        ))}
-      </div>
-    </div>
+    <>
+      <span className="cal-label-cell">
+        <span className="cal-icon">{icon}</span>
+        <span className="cal-label-text">{label}</span>
+      </span>
+      {Array.from({ length: 12 }, (_, i) => (
+        <span
+          key={i}
+          className={`cal-block${months.includes(i + 1) ? ` cal-${type}` : ''}`}
+          title={months.includes(i + 1) ? MONTHS[i] : undefined}
+        />
+      ))}
+    </>
   );
 }
 
@@ -82,26 +88,35 @@ export default function PlantInfoModal({ plantId, onBack, onClose }: Props) {
       {/* ── Calendar ── */}
       <div className="plant-info-section">
         <h3 className="plant-info-section-title">Calendario</h3>
-        <div className="cal-grid">
-          <div className="cal-header">
-            <span className="cal-row-label" />
-            {MONTHS.map((m, i) => (
-              <span key={i} className="cal-month-label">{m}</span>
-            ))}
-          </div>
-          <CalendarRow label="Siembra"     months={info.sowMonths}        type="sow" />
-          {info.transplantMonths && (
-            <CalendarRow label="Trasplante" months={info.transplantMonths} type="transplant" />
-          )}
-          <CalendarRow label="Cosecha"     months={info.harvestMonths}    type="harvest" />
-        </div>
 
-        <div className="cal-legend">
-          <span className="cal-legend-item sow">Siembra</span>
+        {/*
+          Single CSS grid: 1 label column + 12 month columns.
+          CalendarRow returns fragments so each cell is a direct grid child.
+        */}
+        <div className="cal-table">
+
+          {/* Month header */}
+          <span className="cal-label-cell" aria-hidden="true" />
+          {MONTHS.map((m, i) => (
+            <span key={i} className="cal-month-hdr">{m}</span>
+          ))}
+
+          {/* Activity rows */}
+          <CalendarRow
+            icon="🌱" label="Siembra"
+            months={info.sowMonths} type="sow"
+          />
           {info.transplantMonths && (
-            <span className="cal-legend-item transplant">Trasplante</span>
+            <CalendarRow
+              icon="🪴" label="Trasplante"
+              months={info.transplantMonths} type="transplant"
+            />
           )}
-          <span className="cal-legend-item harvest">Cosecha</span>
+          <CalendarRow
+            icon="🧺" label="Cosecha"
+            months={info.harvestMonths} type="harvest"
+          />
+
         </div>
       </div>
 
