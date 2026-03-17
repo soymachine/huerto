@@ -1,4 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import type { Lang } from '../context/LangContext';
 import { AuthProvider }   from '../context/AuthContext';
 import { LangProvider, useLang } from '../context/LangContext';
 import { useGardenData }  from '../hooks/useGardenData';
@@ -169,7 +170,7 @@ function OrchardInner() {
   return (
     <div className="wrap">
 
-      {/* ── Header — single compact row ── */}
+      {/* ── Header ── */}
       <header className="page-header">
         {syncing && <span className="sync-dot" title={t.loading} />}
         <h1 className="header-logo">{t.appTitle}</h1>
@@ -183,10 +184,10 @@ function OrchardInner() {
           <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
         </div>
 
-        {/* Season */}
+        {/* Season — emoji only, name as tooltip */}
         <div className="season-row">
-          <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')}>☀️ {t.summer}</button>
-          <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')}>❄️ {t.winter}</button>
+          <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')} title={t.summer}>☀️</button>
+          <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')} title={t.winter}>❄️</button>
         </div>
 
         {/* Garden selector */}
@@ -212,7 +213,7 @@ function OrchardInner() {
           title={t.familiesHint}
         >🌿 {t.familiesLabel}</button>
 
-        {/* Copy season (icon only, tooltip shows season name) */}
+        {/* Copy season (icon only) */}
         {hasPrevData && (
           <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
         )}
@@ -220,17 +221,16 @@ function OrchardInner() {
         <span className="header-sep" />
 
         <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
-        <div className="lang-toggle">
-          <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
-          <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
-        </div>
+
+        {/* Config panel — grid size + language */}
+        <ConfigButton
+          cols={cols} rows={rows}
+          onCols={setCols} onRows={setRows}
+          lang={lang} setLang={setLang}
+        />
+
         <UserMenu onLoginClick={() => setShowAuthModal(true)} />
       </header>
-
-      {/* ── Grid size bar (compact, below header) ── */}
-      {view === 'garden' && (
-        <GridSizeBar cols={cols} rows={rows} onCols={setCols} onRows={setRows} />
-      )}
 
       {/* ── Print-only season header ── */}
       <div className="print-header">
@@ -312,30 +312,74 @@ function OrchardInner() {
   );
 }
 
-// ─── Grid size helper ────────────────────────────────────────────────────────
+// ─── Config button + panel ────────────────────────────────────────────────────
 
-function GridSizeBar({ cols, rows, onCols, onRows }: { cols: number; rows: number; onCols: (n: number) => void; onRows: (n: number) => void }) {
+function ConfigButton({
+  cols, rows, onCols, onRows, lang, setLang,
+}: {
+  cols: number; rows: number;
+  onCols: (n: number) => void; onRows: (n: number) => void;
+  lang: Lang; setLang: (l: Lang) => void;
+}) {
   const { t } = useLang();
-  const [c, setC] = useState(String(cols));
-  const [r, setR] = useState(String(rows));
-  useEffect(() => setC(String(cols)), [cols]);
-  useEffect(() => setR(String(rows)), [rows]);
-  const cc = () => { const n = parseInt(c); const v = Math.max(1, Math.min(20, isNaN(n) ? cols : n)); setC(String(v)); onCols(v); };
-  const cr = () => { const n = parseInt(r); const v = Math.max(1, Math.min(30, isNaN(n) ? rows : n)); setR(String(v)); onRows(v); };
+  const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const fn = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', fn);
+    return () => document.removeEventListener('mousedown', fn);
+  }, [open]);
+
+  const clampCols = (n: number) => Math.max(1, Math.min(20, n));
+  const clampRows = (n: number) => Math.max(1, Math.min(30, n));
+
   return (
-    <div className="grid-size-bar">
-      <span className="ctrl-label">{t.gridSize}</span>
-      <div className="size-row">
-        <div className="size-field">
-          <span className="size-sublabel">{t.colLabel}</span>
-          <input className="size-inp" type="number" value={c} min={1} max={20} onChange={e => setC(e.target.value)} onBlur={cc} onKeyDown={e => e.key === 'Enter' && cc()} />
+    <div className="cfg-wrap" ref={wrapRef}>
+      <button
+        className={`cfg-trigger-btn${open ? ' active' : ''}`}
+        onClick={() => setOpen(v => !v)}
+        title={t.settings}
+      >⚙</button>
+
+      {open && (
+        <div className="cfg-panel">
+          <p className="cfg-panel-title">{t.settings}</p>
+
+          {/* Grid size */}
+          <div className="cfg-section">
+            <p className="cfg-section-label">{t.gridSize}</p>
+            <div className="cfg-row">
+              <span className="cfg-field-label">{t.colLabel}</span>
+              <div className="cfg-stepper">
+                <button className="cfg-step-btn" onClick={() => onCols(clampCols(cols - 1))}>−</button>
+                <span className="cfg-step-val">{cols}</span>
+                <button className="cfg-step-btn" onClick={() => onCols(clampCols(cols + 1))}>+</button>
+              </div>
+            </div>
+            <div className="cfg-row">
+              <span className="cfg-field-label">{t.rowLabel}</span>
+              <div className="cfg-stepper">
+                <button className="cfg-step-btn" onClick={() => onRows(clampRows(rows - 1))}>−</button>
+                <span className="cfg-step-val">{rows}</span>
+                <button className="cfg-step-btn" onClick={() => onRows(clampRows(rows + 1))}>+</button>
+              </div>
+            </div>
+          </div>
+
+          {/* Language */}
+          <div className="cfg-section">
+            <p className="cfg-section-label">{t.language}</p>
+            <div className="lang-toggle">
+              <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
+              <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
+            </div>
+          </div>
         </div>
-        <span className="size-x">×</span>
-        <div className="size-field">
-          <span className="size-sublabel">{t.rowLabel}</span>
-          <input className="size-inp" type="number" value={r} min={1} max={30} onChange={e => setR(e.target.value)} onBlur={cr} onKeyDown={e => e.key === 'Enter' && cr()} />
-        </div>
-      </div>
+      )}
     </div>
   );
 }
