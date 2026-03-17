@@ -1203,12 +1203,17 @@ body.winter {
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;   /* single line on desktop */
+  overflow-x: auto;    /* scroll if truly too narrow */
 }
 
-/* Remove bottom margin from .controls when inside command-bar */
+/* Compact .controls inside command-bar: remove card chrome, reduce padding */
 .command-bar .controls {
   margin-bottom: 0;
+  flex-shrink: 0;
+}
+.command-bar .ctrl-block {
+  padding: 8px 16px;
 }
 
 .command-bar-sep {
@@ -1659,8 +1664,9 @@ body.winter {
   .gs-trigger-name { max-width: 110px; }
   .grid-toolbar { gap: 8px; }
   .families-hint { display: none; }
-  .command-bar { gap: 8px; }
+  .command-bar { gap: 8px; flex-wrap: wrap; overflow-x: visible; }
   .command-bar-sep { display: none; }
   .command-bar .controls { width: 100%; }
+  .command-bar .ctrl-block { padding: 10px 14px; }
   .lang-btn { padding: 4px 7px; font-size: 0.65rem; }
 }

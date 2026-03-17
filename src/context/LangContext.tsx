@@ -35,6 +35,8 @@ export interface Translations {
   compatWarning:      string;
   compatDetail:       (neighborName: string, currentName: string) => string;
   // Grid
+  clickToPlant:       string;
+  hasNote:            string;
   showFamilies:       string;
   hideFamilies:       string;
   familiesHint:       string;
@@ -116,6 +118,8 @@ const ES: Translations = {
   compatWarning:      'Incompatibilidad',
   compatDetail:       (neighbor, current) =>
     `${neighbor} no es buena planta vecina para ${current}.`,
+  clickToPlant:       'Haz clic para plantar algo aquí',
+  hasNote:            'Esta parcela tiene notas',
   showFamilies:       'Ver familias botánicas',
   hideFamilies:       'Ocultar familias',
   familiesHint:       'Cada color representa una familia botánica — útil para planificar la rotación',
@@ -195,6 +199,8 @@ const EN: Translations = {
   compatWarning:      'Incompatibility',
   compatDetail:       (neighbor, current) =>
     `${neighbor} is not a good neighbour for ${current}.`,
+  clickToPlant:       'Click to plant something here',
+  hasNote:            'This plot has notes',
   showFamilies:       'Show botanical families',
   hideFamilies:       'Hide families',
   familiesHint:       'Each colour represents a botanical family — useful for planning crop rotation',

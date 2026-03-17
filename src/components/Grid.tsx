@@ -1,5 +1,6 @@
 import { findPlant } from '../data/plants';
-import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, FAMILY_LABEL } from '../data/cropFamilies';
+import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR } from '../data/cropFamilies';
+import { useLang } from '../context/LangContext';
 
 export interface CellWarnings {
   rotation:       boolean;
@@ -19,6 +20,7 @@ interface Props {
 }
 
 export default function Grid({ rows, cols, showFamilies, getCell, getCellWarnings, onCellClick }: Props) {
+  const { lang, t } = useLang();
   return (
     <div
       className="grid"
@@ -33,7 +35,8 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
           const family      = plantId ? CROP_FAMILY[plantId] : null;
           const familyColor = showFamilies && family ? FAMILY_COLOR[family] : undefined;
           const familyAbbr  = showFamilies && family ? FAMILY_ABBR[family]  : undefined;
-          const familyLabel = showFamilies && family ? FAMILY_LABEL[family] : undefined;
+          const familyLabel = showFamilies && family ? (t.familyNames[family] ?? family) : undefined;
+          const plantName   = plant ? (lang === 'en' ? (plant.nameEn ?? plant.name) : plant.name) : null;
 
           return (
             <div
@@ -42,8 +45,8 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
               style={familyColor ? { background: familyColor, borderColor: familyColor } : undefined}
               title={
                 showFamilies && familyLabel
-                  ? `${plant?.name ?? ''} · ${familyLabel}`
-                  : plant ? plant.name : 'Haz clic para plantar algo aquí'
+                  ? `${plantName ?? ''} · ${familyLabel}`
+                  : plantName ?? t.clickToPlant
               }
               onClick={() => onCellClick({ r, c })}
             >
@@ -53,7 +56,7 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
                   {showFamilies && familyAbbr ? (
                     <span className="cell-family-abbr">{familyAbbr}</span>
                   ) : (
-                    <span className="cell-name">{plant.name}</span>
+                    <span className="cell-name">{plantName}</span>
                   )}
                 </>
               ) : (
@@ -70,7 +73,7 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
                     <span className="cbadge cbadge-compat" data-tooltip={warnings.compatDetail}>!</span>
                   )}
                   {warnings.hasNote && (
-                    <span className="cbadge cbadge-note" data-tooltip="Esta parcela tiene notas">✎</span>
+                    <span className="cbadge cbadge-note" data-tooltip={t.hasNote}>✎</span>
                   )}
                 </div>
               )}
