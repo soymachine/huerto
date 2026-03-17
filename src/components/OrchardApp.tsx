@@ -7,7 +7,6 @@ import { PLANT_INFO }     from '../data/plantInfo';
 import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
 import type { CellWarnings }                  from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
-import Controls       from './Controls';
 import Grid           from './Grid';
 import PlantModal     from './PlantModal';
 import Legend         from './Legend';
@@ -170,91 +169,68 @@ function OrchardInner() {
   return (
     <div className="wrap">
 
-      {/* ── Header ── */}
+      {/* ── Header — single compact row ── */}
       <header className="page-header">
-        <div className="header-left">
-          <h1>{t.appTitle}</h1>
-          <p>{t.appSubtitle}</p>
-        </div>
-        <div className="header-right">
-          {syncing && <span className="sync-dot" title={t.loading} />}
-          <div className="header-controls">
-            <div className="year-row">
-              <button className="year-btn" onClick={() => setYear(year - 1)}>−</button>
-              <span className="year-val">{year}</span>
-              <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
-            </div>
-            <div className="season-row">
-              <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')}>☀️ {t.summer}</button>
-              <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')}>❄️ {t.winter}</button>
-            </div>
-          </div>
-          <GardenSelector
-            gardens={gardens}
-            activeId={activeGardenId}
-            onSwitch={switchGarden}
-            onCreate={createGarden}
-            onRename={renameGarden}
-            onDelete={deleteGarden}
-          />
-          <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
-          <div className="lang-toggle">
-            <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
-            <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
-          </div>
-          <UserMenu onLoginClick={() => setShowAuthModal(true)} />
-        </div>
-      </header>
+        {syncing && <span className="sync-dot" title={t.loading} />}
+        <h1 className="header-logo">{t.appTitle}</h1>
 
-      {/* ── Unified bar: view tabs + year/season/grid + families toggle ── */}
-      <div className="unified-bar">
-        {/* View tabs block */}
-        <div className="ctrl-block">
-          <span className="ctrl-label">{t.viewLabel}</span>
-          <div className="view-tabs-row">
-            <button
-              className={`view-tab${view === 'garden' ? ' active' : ''}`}
-              onClick={() => setView('garden')}
-            >🌱 {t.tabGarden}</button>
-            <button
-              className={`view-tab${view === 'calendar' ? ' active' : ''}`}
-              onClick={() => setView('calendar')}
-            >📅 {t.tabCalendar}</button>
-          </div>
+        <span className="header-sep" />
+
+        {/* Year */}
+        <div className="year-row">
+          <button className="year-btn" onClick={() => setYear(year - 1)}>−</button>
+          <span className="year-val">{year}</span>
+          <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
         </div>
 
-        {/* Controls — year+season hidden via CSS on desktop (they live in the header) */}
-        <Controls
-          year={year}    season={season}
-          cols={cols}    rows={rows}
-          onYearChange={setYear}
-          onSeasonChange={setSeason}
-          onColsChange={setCols}
-          onRowsChange={setRows}
+        {/* Season */}
+        <div className="season-row">
+          <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')}>☀️ {t.summer}</button>
+          <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')}>❄️ {t.winter}</button>
+        </div>
+
+        {/* Garden selector */}
+        <GardenSelector
+          gardens={gardens}
+          activeId={activeGardenId}
+          onSwitch={switchGarden}
+          onCreate={createGarden}
+          onRename={renameGarden}
+          onDelete={deleteGarden}
         />
 
-        {/* Families toggle block */}
-        <div className="ctrl-block">
-          <span className="ctrl-label">{t.familiesLabel}</span>
-          <button
-            className={`families-ctrl-btn${showFamilies ? ' active' : ''}`}
-            onClick={() => setShowFamilies(v => !v)}
-            title={t.familiesHint}
-          >
-            🌿 {showFamilies ? t.hideFamilies : t.showFamilies}
-          </button>
-        </div>
+        <span className="header-sep" />
 
-        {/* Copy previous season block — only when there's data to copy */}
+        {/* View tabs */}
+        <button className={`view-tab${view === 'garden' ? ' active' : ''}`} onClick={() => setView('garden')}>🌱 {t.tabGarden}</button>
+        <button className={`view-tab${view === 'calendar' ? ' active' : ''}`} onClick={() => setView('calendar')}>📅 {t.tabCalendar}</button>
+
+        {/* Families toggle */}
+        <button
+          className={`families-ctrl-btn${showFamilies ? ' active' : ''}`}
+          onClick={() => setShowFamilies(v => !v)}
+          title={t.familiesHint}
+        >🌿 {t.familiesLabel}</button>
+
+        {/* Copy season (icon only, tooltip shows season name) */}
         {hasPrevData && (
-          <div className="ctrl-block">
-            <span className="ctrl-label">{t.copySeasonLabel}</span>
-            <button className="copy-season-btn" onClick={handleCopySeason} title={prevSeasonLabel}>
-              ⬆ {t.copySeason}
-            </button>
-          </div>
+          <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
         )}
-      </div>
+
+        <span className="header-sep" />
+
+        <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
+        <div className="lang-toggle">
+          <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
+          <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
+        </div>
+        <UserMenu onLoginClick={() => setShowAuthModal(true)} />
+      </header>
+
+      {/* ── Grid size bar (compact, below header) ── */}
+      {view === 'garden' && (
+        <GridSizeBar cols={cols} rows={rows} onCols={setCols} onRows={setRows} />
+      )}
 
       {/* ── Print-only season header ── */}
       <div className="print-header">
@@ -332,6 +308,34 @@ function OrchardInner() {
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </div>
 
+    </div>
+  );
+}
+
+// ─── Grid size helper ────────────────────────────────────────────────────────
+
+function GridSizeBar({ cols, rows, onCols, onRows }: { cols: number; rows: number; onCols: (n: number) => void; onRows: (n: number) => void }) {
+  const { t } = useLang();
+  const [c, setC] = useState(String(cols));
+  const [r, setR] = useState(String(rows));
+  useEffect(() => setC(String(cols)), [cols]);
+  useEffect(() => setR(String(rows)), [rows]);
+  const cc = () => { const n = parseInt(c); const v = Math.max(1, Math.min(20, isNaN(n) ? cols : n)); setC(String(v)); onCols(v); };
+  const cr = () => { const n = parseInt(r); const v = Math.max(1, Math.min(30, isNaN(n) ? rows : n)); setR(String(v)); onRows(v); };
+  return (
+    <div className="grid-size-bar">
+      <span className="ctrl-label">{t.gridSize}</span>
+      <div className="size-row">
+        <div className="size-field">
+          <span className="size-sublabel">{t.colLabel}</span>
+          <input className="size-inp" type="number" value={c} min={1} max={20} onChange={e => setC(e.target.value)} onBlur={cc} onKeyDown={e => e.key === 'Enter' && cc()} />
+        </div>
+        <span className="size-x">×</span>
+        <div className="size-field">
+          <span className="size-sublabel">{t.rowLabel}</span>
+          <input className="size-inp" type="number" value={r} min={1} max={30} onChange={e => setR(e.target.value)} onBlur={cr} onKeyDown={e => e.key === 'Enter' && cr()} />
+        </div>
+      </div>
     </div>
   );
 }

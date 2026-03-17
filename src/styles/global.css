@@ -56,36 +56,52 @@ body.winter {
 .page-header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding-bottom: 20px;
+  gap: 8px;
+  padding: 10px 0 14px;
   border-bottom: 1.5px solid var(--border);
-  margin-bottom: 20px;
+  margin-bottom: 14px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
-.header-left h1 {
+.header-logo {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 4rem;
+  font-size: 1.7rem;
   font-weight: 500;
-  line-height: 0.9;
-  letter-spacing: -0.02em;
+  line-height: 1;
+  letter-spacing: -0.01em;
   color: var(--green);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
-.header-left p {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: 1.15rem;
-  color: var(--muted);
-  margin-top: 6px;
+/* thin vertical divider between header groups */
+.header-sep {
+  display: inline-block;
+  width: 1px;
+  height: 24px;
+  background: var(--border);
+  flex-shrink: 0;
+  margin: 0 2px;
 }
 
-.header-meta {
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
+/* ── Grid size bar (below header, above grid) ── */
+.grid-size-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.grid-size-bar .ctrl-label {
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--muted);
-  text-align: right;
+  font-weight: 700;
 }
+.grid-size-bar .size-row { gap: 6px; }
+.grid-size-bar .size-inp { width: 44px; padding: 4px 6px; font-size: 0.95rem; }
 
 /* ─── CONTROLS ─── */
 .controls {
@@ -706,31 +722,23 @@ body.winter {
 
 /* ─── RESPONSIVE ─── */
 @media (max-width: 640px) {
-  body { padding: 24px 16px 60px; font-size: 14px; }
+  body { padding: 16px 12px 60px; font-size: 14px; }
 
+  /* header scrolls horizontally on mobile */
   .page-header {
-    flex-direction: column;
-    align-items: flex-start;
     gap: 6px;
-    padding-bottom: 18px;
-    margin-bottom: 24px;
+    padding: 8px 0 10px;
+    margin-bottom: 10px;
   }
-  .header-left h1 { font-size: 2.6rem; }
-  .header-left p  { font-size: 1rem; }
-  .header-meta    { text-align: left; font-size: 0.7rem; }
+  .header-logo { font-size: 1.3rem; }
 
-  .controls {
-    flex-direction: column;
-    width: 100%;
-    align-items: stretch;
-  }
   .ctrl-block { padding: 12px 16px; }
   .ctrl-block + .ctrl-block {
     border-left: none;
     border-top: 1.5px solid var(--border);
   }
   .season-btn { flex: 1; justify-content: center; }
-  .year-val   { font-size: 1.7rem; min-width: 54px; }
+  .year-val   { font-size: 1.35rem; min-width: 46px; }
 
   :root { --cell-size: 52px; }
   .cell-emoji { font-size: 1.1rem; }
@@ -783,35 +791,17 @@ body.winter {
   background: white;
 }
 
-/* ─── HEADER RIGHT (meta + user) ─── */
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* Year + season selectors living in the header */
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-shrink: 0;
-}
-.header-controls .year-row { gap: 6px; }
-.header-controls .year-btn  { width: 26px; height: 26px; font-size: 0.95rem; }
-.header-controls .year-val  { font-size: 1.5rem; min-width: 52px; }
-.header-controls .season-btn { padding: 5px 12px; font-size: 0.78rem; }
-
-.header-meta {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.78rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--muted);
-  text-align: right;
-}
+/* compact year/season inside the header (now direct children, not inside header-controls) */
+.page-header .year-row { gap: 5px; flex-shrink: 0; }
+.page-header .year-btn  { width: 24px; height: 24px; font-size: 0.9rem; }
+.page-header .year-val  { font-size: 1.35rem; min-width: 46px; }
+.page-header .season-row { flex-shrink: 0; }
+.page-header .season-btn { padding: 4px 10px; font-size: 0.76rem; }
+.page-header .view-tab   { flex-shrink: 0; }
+.page-header .families-ctrl-btn { flex-shrink: 0; }
+.page-header .copy-season-btn.icon-only { padding: 6px 10px; flex-shrink: 0; }
+.page-header .print-btn  { flex-shrink: 0; }
+.page-header .lang-toggle { flex-shrink: 0; }
 
 /* Syncing indicator dot */
 .sync-dot {
@@ -1027,17 +1017,14 @@ body.winter {
 
 /* ─── RESPONSIVE: auth adjustments ─── */
 @media (max-width: 640px) {
-  .header-right  { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
-  .header-controls { display: none; }   /* year+season collapse into the unified bar on mobile */
-  .unified-bar > .controls { /* show year+season again inside the bar on mobile */ }
   .auth-modal    { width: 100%; }
   .user-dropdown {
     position: fixed;
-    top: 56px;
-    right: 16px;
+    top: 52px;
+    right: 12px;
     left: auto;
     min-width: 200px;
-    max-width: calc(100vw - 32px);
+    max-width: calc(100vw - 24px);
   }
 }
 
