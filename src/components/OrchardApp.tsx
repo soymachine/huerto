@@ -169,6 +169,14 @@ function OrchardInner() {
             {syncing && <span className="sync-dot" title={t.loading} />}
             {season === 'summer' ? `☀️ ${t.summer} ${year}` : `❄️ ${t.winter} ${year}`}
           </span>
+          <GardenSelector
+            gardens={gardens}
+            activeId={activeGardenId}
+            onSwitch={switchGarden}
+            onCreate={createGarden}
+            onRename={renameGarden}
+            onDelete={deleteGarden}
+          />
           <div className="lang-toggle">
             <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
             <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
@@ -177,27 +185,24 @@ function OrchardInner() {
         </div>
       </header>
 
-      {/* ── Command bar: garden selector + tabs + controls ── */}
-      <div className="command-bar">
-        <GardenSelector
-          gardens={gardens}
-          activeId={activeGardenId}
-          onSwitch={switchGarden}
-          onCreate={createGarden}
-          onRename={renameGarden}
-          onDelete={deleteGarden}
-        />
-        <nav className="app-tabs">
-          <button
-            className={`app-tab${view === 'garden' ? ' active' : ''}`}
-            onClick={() => setView('garden')}
-          >🌱 {t.tabGarden}</button>
-          <button
-            className={`app-tab${view === 'calendar' ? ' active' : ''}`}
-            onClick={() => setView('calendar')}
-          >📅 {t.tabCalendar}</button>
-        </nav>
-        <div className="command-bar-sep" />
+      {/* ── Unified bar: view tabs + year/season/grid + families toggle ── */}
+      <div className="unified-bar">
+        {/* View tabs block */}
+        <div className="ctrl-block">
+          <span className="ctrl-label">{t.viewLabel}</span>
+          <div className="view-tabs-row">
+            <button
+              className={`view-tab${view === 'garden' ? ' active' : ''}`}
+              onClick={() => setView('garden')}
+            >🌱 {t.tabGarden}</button>
+            <button
+              className={`view-tab${view === 'calendar' ? ' active' : ''}`}
+              onClick={() => setView('calendar')}
+            >📅 {t.tabCalendar}</button>
+          </div>
+        </div>
+
+        {/* Year, season, grid controls */}
         <Controls
           year={year}    season={season}
           cols={cols}    rows={rows}
@@ -206,25 +211,23 @@ function OrchardInner() {
           onColsChange={setCols}
           onRowsChange={setRows}
         />
+
+        {/* Families toggle block */}
+        <div className="ctrl-block">
+          <span className="ctrl-label">{t.familiesLabel}</span>
+          <button
+            className={`families-ctrl-btn${showFamilies ? ' active' : ''}`}
+            onClick={() => setShowFamilies(v => !v)}
+            title={t.familiesHint}
+          >
+            🌿 {showFamilies ? t.hideFamilies : t.showFamilies}
+          </button>
+        </div>
       </div>
 
       {/* ── Garden view ── */}
       {view === 'garden' && (
         <>
-          {/* Family overlay toggle */}
-          <div className="grid-toolbar">
-            <button
-              className={`btn-families${showFamilies ? ' active' : ''}`}
-              onClick={() => setShowFamilies(v => !v)}
-              title={t.familiesHint}
-            >
-              {showFamilies ? `🌿 ${t.hideFamilies}` : `🌿 ${t.showFamilies}`}
-            </button>
-            {showFamilies && (
-              <span className="families-hint">{t.familiesHint}</span>
-            )}
-          </div>
-
           <div className="grid-scroll">
             <Grid
               rows={rows}

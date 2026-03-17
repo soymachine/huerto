@@ -34,7 +34,9 @@ export interface Translations {
   rotationDetail:     (prevName: string, family: string) => string;
   compatWarning:      string;
   compatDetail:       (neighborName: string, currentName: string) => string;
-  // Grid
+  // Grid / unified bar
+  viewLabel:          string;
+  familiesLabel:      string;
   clickToPlant:       string;
   hasNote:            string;
   showFamilies:       string;
@@ -118,9 +120,11 @@ const ES: Translations = {
   compatWarning:      'Incompatibilidad',
   compatDetail:       (neighbor, current) =>
     `${neighbor} no es buena planta vecina para ${current}.`,
+  viewLabel:          'Vista',
+  familiesLabel:      'Familias',
   clickToPlant:       'Haz clic para plantar algo aquí',
   hasNote:            'Esta parcela tiene notas',
-  showFamilies:       'Ver familias botánicas',
+  showFamilies:       'Ver familias',
   hideFamilies:       'Ocultar familias',
   familiesHint:       'Cada color representa una familia botánica — útil para planificar la rotación',
   botanicalFamilies:  'Familias botánicas',
@@ -199,9 +203,11 @@ const EN: Translations = {
   compatWarning:      'Incompatibility',
   compatDetail:       (neighbor, current) =>
     `${neighbor} is not a good neighbour for ${current}.`,
+  viewLabel:          'View',
+  familiesLabel:      'Families',
   clickToPlant:       'Click to plant something here',
   hasNote:            'This plot has notes',
-  showFamilies:       'Show botanical families',
+  showFamilies:       'Show families',
   hideFamilies:       'Hide families',
   familiesHint:       'Each colour represents a botanical family — useful for planning crop rotation',
   botanicalFamilies:  'Botanical families',

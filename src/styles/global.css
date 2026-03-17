@@ -55,11 +55,11 @@ body.winter {
 /* ─── HEADER ─── */
 .page-header {
   display: flex;
-  align-items: flex-end;
+  align-items: center;
   justify-content: space-between;
-  padding-bottom: 28px;
+  padding-bottom: 20px;
   border-bottom: 1.5px solid var(--border);
-  margin-bottom: 40px;
+  margin-bottom: 20px;
 }
 
 .header-left h1 {
@@ -1195,27 +1195,104 @@ body.winter {
 }
 
 /* ═══════════════════════════════════════════════════════
-   COMMAND BAR (garden selector + tabs + controls, one row)
+   UNIFIED BAR (view tabs + year/season/grid + families — one pill)
 ═══════════════════════════════════════════════════════ */
 
+.unified-bar {
+  display: flex;
+  align-items: center;
+  gap: 0;
+  margin-bottom: 20px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  width: fit-content;
+  max-width: 100%;
+  box-shadow: 0 2px 8px rgba(42,32,16,0.06);
+  flex-wrap: nowrap;
+  overflow-x: auto;
+}
+
+/* Strip Controls' own card styling when inside unified-bar */
+.unified-bar > .controls {
+  border: none;
+  border-left: 1.5px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  margin-bottom: 0;
+  overflow: visible;
+}
+
+/* Families ctrl-block follows Controls: needs left border */
+.unified-bar > .controls + .ctrl-block {
+  border-left: 1.5px solid var(--border);
+}
+
+/* ── View tabs inside unified-bar ── */
+.view-tabs-row {
+  display: flex;
+  gap: 5px;
+}
+.view-tab {
+  padding: 6px 13px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.view-tab.active {
+  background: var(--bg-mid);
+  color: var(--green);
+  border-color: var(--green);
+}
+.view-tab:not(.active):hover { background: var(--bg-mid); color: var(--text); }
+
+/* ── Families toggle button inside unified-bar ctrl-block ── */
+.families-ctrl-btn {
+  padding: 6px 13px;
+  border: 1.5px solid var(--border);
+  background: transparent;
+  border-radius: 5px;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+  transition: all 0.15s;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.families-ctrl-btn.active,
+.families-ctrl-btn:hover {
+  border-color: var(--green);
+  background: var(--green-pale);
+  color: var(--green);
+}
+
+/* ── Old command-bar (kept for reference, no longer used) ── */
 .command-bar {
   display: flex;
   align-items: center;
   gap: 12px;
   margin-bottom: 18px;
-  flex-wrap: nowrap;   /* single line on desktop */
-  overflow-x: auto;    /* scroll if truly too narrow */
+  flex-wrap: nowrap;
+  overflow-x: auto;
 }
-
-/* Compact .controls inside command-bar: remove card chrome, reduce padding */
-.command-bar .controls {
-  margin-bottom: 0;
-  flex-shrink: 0;
-}
-.command-bar .ctrl-block {
-  padding: 8px 16px;
-}
-
+.command-bar .controls { margin-bottom: 0; flex-shrink: 0; }
+.command-bar .ctrl-block { padding: 8px 16px; }
 .command-bar-sep {
   width: 1.5px;
   height: 32px;
@@ -1664,6 +1741,10 @@ body.winter {
   .gs-trigger-name { max-width: 110px; }
   .grid-toolbar { gap: 8px; }
   .families-hint { display: none; }
+  .unified-bar { width: 100%; flex-wrap: wrap; overflow-x: visible; border-radius: 10px; }
+  .unified-bar > .controls { border-left: none; border-top: 1.5px solid var(--border); width: 100%; }
+  .unified-bar > .controls + .ctrl-block { border-left: none; border-top: 1.5px solid var(--border); }
+  .unified-bar .ctrl-block { padding: 10px 14px; }
   .command-bar { gap: 8px; flex-wrap: wrap; overflow-x: visible; }
   .command-bar-sep { display: none; }
   .command-bar .controls { width: 100%; }
