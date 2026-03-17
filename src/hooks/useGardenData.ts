@@ -12,7 +12,7 @@ import {
   createGarden  as dbCreateGarden,
   renameGarden  as dbRenameGarden,
   deleteGarden  as dbDeleteGarden,
-  loadPlantings, upsertPlanting, removePlanting,
+  loadPlantings, upsertPlanting, removePlanting, bulkUpsertPlantings,
   migrateLocalData, migrateLocalNotes,
   updateGardenSize, plantingsToGardenData,
   fetchNotes, upsertNote, dbNotesToNotesData,
@@ -259,6 +259,27 @@ export function useGardenData() {
     if (user && gid) await upsertNote(gid, year, season, r, c, text);
   }, [user, year, season]);
 
+  // ── Copy previous season ─────────────────────────────────────────────────────
+  const copySeason = useCallback(async (): Promise<boolean> => {
+    const prevKey = season === 'summer' ? `${year - 1}-winter` : `${year}-summer`;
+    const fromData = gardenData[prevKey];
+    if (!fromData || Object.keys(fromData).length === 0) return false;
+
+    const toKey = `${year}-${season}`;
+    setGardenData(prev => ({ ...prev, [toKey]: { ...fromData } }));
+
+    const gid = activeIdRef.current;
+    if (user && gid) {
+      setSyncing(true);
+      try {
+        await bulkUpsertPlantings(gid, year, season, fromData);
+      } finally {
+        setSyncing(false);
+      }
+    }
+    return true;
+  }, [gardenData, year, season, user]);
+
   // ── Grid size operations ──────────────────────────────────────────────────────
   const handleSetCols = async (newCols: number) => {
     setCols(newCols);
@@ -287,6 +308,6 @@ export function useGardenData() {
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote,
+    setCell, setNote, copySeason,
   };
 }

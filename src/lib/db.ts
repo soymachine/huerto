@@ -224,6 +224,40 @@ export async function migrateLocalNotes(
   }
 }
 
+// ─── Bulk copy plantings (for copy-season feature) ────────────────────────────
+
+export async function bulkUpsertPlantings(
+  gardenId: string,
+  year: number,
+  season: string,
+  cells: Record<string, string>, // cellKey "r,c" → plantId
+): Promise<void> {
+  const inserts = Object.entries(cells).map(([ck, plantId]) => {
+    const [r, c] = ck.split(',').map(Number);
+    return { garden_id: gardenId, year, season, row_idx: r, col_idx: c, plant_id: plantId };
+  });
+  if (inserts.length === 0) return;
+  await supabase.from('plantings').upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
+}
+
+// ─── Reminders ────────────────────────────────────────────────────────────────
+
+export async function getReminder(userId: string): Promise<boolean> {
+  const { data } = await supabase
+    .from('reminders')
+    .select('enabled')
+    .eq('user_id', userId)
+    .maybeSingle();
+  return (data as { enabled: boolean } | null)?.enabled ?? false;
+}
+
+export async function saveReminder(userId: string, email: string, enabled: boolean): Promise<void> {
+  await supabase.from('reminders').upsert(
+    { user_id: userId, email, enabled },
+    { onConflict: 'user_id' },
+  );
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function plantingsToGardenData(plantings: Planting[]): GardenData {

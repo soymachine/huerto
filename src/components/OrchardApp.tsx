@@ -44,13 +44,25 @@ function OrchardInner() {
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote,
+    setCell, setNote, copySeason,
   } = useGardenData();
 
   const [view,          setView]          = useState<View>('garden');
   const [activeCell,    setActiveCell]    = useState<{ r: number; c: number } | null>(null);
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showFamilies,  setShowFamilies]  = useState(false);
+
+  // ── Previous season data ───────────────────────────────────────────────────
+  const prevSeasonKey = season === 'summer' ? `${year - 1}-winter` : `${year}-summer`;
+  const prevSeasonLabel = season === 'summer'
+    ? `${t.winter} ${year - 1}`
+    : `${t.summer} ${year}`;
+  const hasPrevData = Object.keys(gardenData[prevSeasonKey] ?? {}).length > 0;
+
+  const handleCopySeason = async () => {
+    if (!window.confirm(t.copySeasonConfirm(prevSeasonLabel))) return;
+    await copySeason();
+  };
 
   // ── Winter body class ─────────────────────────────────────────────────────
   useEffect(() => {
@@ -185,6 +197,7 @@ function OrchardInner() {
             onRename={renameGarden}
             onDelete={deleteGarden}
           />
+          <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
           <div className="lang-toggle">
             <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
             <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
@@ -231,6 +244,22 @@ function OrchardInner() {
             🌿 {showFamilies ? t.hideFamilies : t.showFamilies}
           </button>
         </div>
+
+        {/* Copy previous season block — only when there's data to copy */}
+        {hasPrevData && (
+          <div className="ctrl-block">
+            <span className="ctrl-label">{t.copySeasonLabel}</span>
+            <button className="copy-season-btn" onClick={handleCopySeason} title={prevSeasonLabel}>
+              ⬆ {t.copySeason}
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* ── Print-only season header ── */}
+      <div className="print-header">
+        <span>{gardens.find(g => g.id === activeGardenId)?.name}</span>
+        <span>{season === 'summer' ? `☀️ ${t.summer}` : `❄️ ${t.winter}`} {year}</span>
       </div>
 
       {/* ── Garden view ── */}

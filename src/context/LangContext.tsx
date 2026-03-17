@@ -65,6 +65,17 @@ export interface Translations {
   now:                string;
   months:             string[];
   monthsAbbr:         string[];
+  // Copy season
+  copySeason:         string;
+  copySeasonLabel:    string;
+  copySeasonConfirm:  (prevLabel: string) => string;
+  // Print
+  print:              string;
+  // Reminders
+  monthlyReminder:    string;
+  reminderHint:       string;
+  reminderOn:         string;
+  reminderOff:        string;
   // Auth modal
   signInTitle:        string;
   registerTitle:      string;
@@ -152,6 +163,14 @@ const ES: Translations = {
   now:                'Ahora',
   months:             ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'],
   monthsAbbr:         ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'],
+  copySeason:         'Copiar temporada',
+  copySeasonLabel:    'Anterior',
+  copySeasonConfirm:  prev => `¿Copiar el plan de ${prev} a esta temporada? Se sobreescribirá lo que haya ahora.`,
+  print:              'Imprimir',
+  monthlyReminder:    'Recordatorio mensual',
+  reminderHint:       'Recibe un email el 1 de cada mes con las tareas de tu huerto',
+  reminderOn:         'Activo',
+  reminderOff:        'Inactivo',
   signInTitle:        'Acceder a tu huerto',
   registerTitle:      'Crear una cuenta',
   signInSub:          'Tus datos se guardan en la nube y puedes acceder desde cualquier dispositivo.',
@@ -235,6 +254,14 @@ const EN: Translations = {
   now:                'Now',
   months:             ['January','February','March','April','May','June','July','August','September','October','November','December'],
   monthsAbbr:         ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+  copySeason:         'Copy season',
+  copySeasonLabel:    'Previous',
+  copySeasonConfirm:  prev => `Copy the plan from ${prev} to this season? Current plantings will be overwritten.`,
+  print:              'Print',
+  monthlyReminder:    'Monthly reminder',
+  reminderHint:       'Receive an email on the 1st of each month with your garden tasks',
+  reminderOn:         'Active',
+  reminderOff:        'Inactive',
   signInTitle:        'Access your garden',
   registerTitle:      'Create an account',
   signInSub:          'Your data is saved in the cloud and accessible from any device.',
