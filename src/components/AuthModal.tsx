@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
+import { useLang } from '../context/LangContext';
 
 interface Props {
   onClose: () => void;
@@ -20,6 +21,7 @@ function friendlyError(msg: string): string {
 
 export default function AuthModal({ onClose }: Props) {
   const { signIn, signUp } = useAuth();
+  const { t } = useLang();
 
   const [mode,     setMode]     = useState<Mode>('login');
   const [email,    setEmail]    = useState('');
@@ -58,22 +60,20 @@ export default function AuthModal({ onClose }: Props) {
       {/* Header */}
       <div className="modal-head">
         <h2 className="modal-title" id="authModalTitle">
-          {mode === 'login' ? 'Acceder al huerto' : 'Crear una cuenta'}
+          {mode === 'login' ? t.signInTitle : t.registerTitle}
         </h2>
         <button className="modal-close" onClick={onClose} aria-label="Cerrar">✕</button>
       </div>
       <p className="modal-sub">
-        {mode === 'login'
-          ? 'Tus datos se guardan en la nube y puedes acceder desde cualquier dispositivo.'
-          : 'Crea una cuenta gratuita para guardar el huerto en la nube de forma segura.'}
+        {mode === 'login' ? t.signInSub : t.registerSub}
       </p>
 
       {/* Success state */}
       {success ? (
         <div className="auth-success">
           <span className="auth-success-icon">✉️</span>
-          <p>Revisa tu correo y confirma la cuenta para empezar.</p>
-          <button className="auth-submit" onClick={onClose}>Cerrar</button>
+          <p>{t.confirmEmail}</p>
+          <button className="auth-submit" onClick={onClose}>{t.signInTitle}</button>
         </div>
       ) : (
         <>
@@ -81,7 +81,7 @@ export default function AuthModal({ onClose }: Props) {
           <form className="auth-form" onSubmit={handleSubmit} noValidate>
             <div className="auth-field">
               <label className="auth-label" htmlFor="auth-email">
-                Correo electrónico
+                {t.emailLabel}
               </label>
               <input
                 id="auth-email"
@@ -97,7 +97,7 @@ export default function AuthModal({ onClose }: Props) {
 
             <div className="auth-field">
               <label className="auth-label" htmlFor="auth-password">
-                Contraseña
+                {t.passwordLabel}
               </label>
               <input
                 id="auth-password"
@@ -105,7 +105,7 @@ export default function AuthModal({ onClose }: Props) {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                placeholder="Mínimo 6 caracteres"
+                placeholder={t.passwordHint}
                 required
                 minLength={6}
                 autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
@@ -120,23 +120,23 @@ export default function AuthModal({ onClose }: Props) {
               disabled={loading}
             >
               {loading
-                ? 'Un momento...'
-                : mode === 'login' ? 'Entrar' : 'Crear cuenta'}
+                ? '...'
+                : mode === 'login' ? t.signIn : t.registerTitle}
             </button>
           </form>
 
           {/* Switch mode */}
           <p className="auth-switch">
             {mode === 'login' ? (
-              <>¿Sin cuenta aún?{' '}
+              <>{t.noAccount}{' '}
                 <button type="button" onClick={() => switchMode('register')}>
-                  Regístrate aquí
+                  {t.registerHere}
                 </button>
               </>
             ) : (
-              <>¿Ya tienes cuenta?{' '}
+              <>{t.hasAccount}{' '}
                 <button type="button" onClick={() => switchMode('login')}>
-                  Inicia sesión
+                  {t.signInHere}
                 </button>
               </>
             )}

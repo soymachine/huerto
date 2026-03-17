@@ -1,10 +1,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import { AuthProvider }   from '../context/AuthContext';
+import { LangProvider, useLang } from '../context/LangContext';
 import { useGardenData }  from '../hooks/useGardenData';
 import { findPlant }      from '../data/plants';
 import { PLANT_INFO }     from '../data/plantInfo';
-import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, FAMILY_LABEL, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
-import type { CellWarnings }            from './Grid';
+import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
+import type { CellWarnings }                  from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
 import Controls       from './Controls';
 import Grid           from './Grid';
@@ -18,12 +19,14 @@ import '../styles/global.css';
 
 type View = 'garden' | 'calendar';
 
-// ─── Root ─────────────────────────────────────────────────────────────────────
+// ─── Root: Auth + Lang providers ─────────────────────────────────────────────
 
 export default function OrchardApp() {
   return (
     <AuthProvider>
-      <OrchardInner />
+      <LangProvider>
+        <OrchardInner />
+      </LangProvider>
     </AuthProvider>
   );
 }
@@ -31,6 +34,7 @@ export default function OrchardApp() {
 // ─── Inner app ────────────────────────────────────────────────────────────────
 
 function OrchardInner() {
+  const { t, lang, setLang } = useLang();
   const {
     gardens, activeGardenId,
     switchGarden, createGarden, renameGarden, deleteGarden,
@@ -71,12 +75,13 @@ function OrchardInner() {
   const currentPlant = activeCell ? getCell(activeCell.r, activeCell.c) : null;
   const planted      = gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : [];
 
-  // Unique botanical families present in this season (for the overlay legend)
   const activeFamilies = useMemo(() => {
     const seen = new Set<string>();
     planted.forEach(id => { const f = CROP_FAMILY[id]; if (f) seen.add(f); });
-    return [...seen].sort((a, b) => (FAMILY_LABEL[a] ?? a).localeCompare(FAMILY_LABEL[b] ?? b));
-  }, [planted]);
+    return [...seen].sort((a, b) =>
+      (t.familyNames[a] ?? a).localeCompare(t.familyNames[b] ?? b),
+    );
+  }, [planted, t]);
 
   // ── Per-cell warnings ─────────────────────────────────────────────────────
   const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
@@ -87,7 +92,7 @@ function OrchardInner() {
     const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
     const rotation    = hasRotationIssue(plantId, prevPlantId);
     const rotationDetail = rotation && prevPlantId
-      ? `↺ ${findPlant(prevPlantId)?.name ?? prevPlantId} (${FAMILY_LABEL[CROP_FAMILY[plantId]] ?? 'misma familia'}) estuvo aquí la temporada anterior`
+      ? `↺ ${t.rotationDetail(findPlant(prevPlantId)?.name ?? prevPlantId, t.familyNames[CROP_FAMILY[plantId]] ?? '')}`
       : '';
 
     const info = PLANT_INFO[plantId];
@@ -118,7 +123,7 @@ function OrchardInner() {
     if (!hasRotationIssue(currentPlant, prevPlantId) || !prevPlantId) return null;
     return {
       prevPlantName: findPlant(prevPlantId)?.name ?? prevPlantId,
-      familyLabel:   FAMILY_LABEL[CROP_FAMILY[currentPlant]] ?? '',
+      familyLabel:   t.familyNames[CROP_FAMILY[currentPlant]] ?? '',
     };
   }, [activeCell, currentPlant, gardenData, year, season]);
 
@@ -147,7 +152,7 @@ function OrchardInner() {
     : '';
 
   if (!ready) {
-    return <div className="app-loading"><span>Cargando el huerto…</span></div>;
+    return <div className="app-loading"><span>{t.loading}</span></div>;
   }
 
   return (
@@ -156,20 +161,24 @@ function OrchardInner() {
       {/* ── Header ── */}
       <header className="page-header">
         <div className="header-left">
-          <h1>El Huerto</h1>
-          <p>Planificador estacional de cultivos</p>
+          <h1>{t.appTitle}</h1>
+          <p>{t.appSubtitle}</p>
         </div>
         <div className="header-right">
           <span className="header-meta">
-            {syncing && <span className="sync-dot" title="Guardando…" />}
-            {season === 'summer' ? `☀️ Verano ${year}` : `❄️ Invierno ${year}`}
+            {syncing && <span className="sync-dot" title={t.loading} />}
+            {season === 'summer' ? `☀️ ${t.summer} ${year}` : `❄️ ${t.winter} ${year}`}
           </span>
+          <div className="lang-toggle">
+            <button className={`lang-btn${lang === 'es' ? ' active' : ''}`} onClick={() => setLang('es')}>ES</button>
+            <button className={`lang-btn${lang === 'en' ? ' active' : ''}`} onClick={() => setLang('en')}>EN</button>
+          </div>
           <UserMenu onLoginClick={() => setShowAuthModal(true)} />
         </div>
       </header>
 
-      {/* ── Garden selector + tabs ── */}
-      <div className="app-toolbar">
+      {/* ── Command bar: garden selector + tabs + controls ── */}
+      <div className="command-bar">
         <GardenSelector
           gardens={gardens}
           activeId={activeGardenId}
@@ -182,39 +191,37 @@ function OrchardInner() {
           <button
             className={`app-tab${view === 'garden' ? ' active' : ''}`}
             onClick={() => setView('garden')}
-          >🌱 Huerto</button>
+          >🌱 {t.tabGarden}</button>
           <button
             className={`app-tab${view === 'calendar' ? ' active' : ''}`}
             onClick={() => setView('calendar')}
-          >📅 Calendario</button>
+          >📅 {t.tabCalendar}</button>
         </nav>
+        <div className="command-bar-sep" />
+        <Controls
+          year={year}    season={season}
+          cols={cols}    rows={rows}
+          onYearChange={setYear}
+          onSeasonChange={setSeason}
+          onColsChange={setCols}
+          onRowsChange={setRows}
+        />
       </div>
 
       {/* ── Garden view ── */}
       {view === 'garden' && (
         <>
-          <Controls
-            year={year}    season={season}
-            cols={cols}    rows={rows}
-            onYearChange={setYear}
-            onSeasonChange={setSeason}
-            onColsChange={setCols}
-            onRowsChange={setRows}
-          />
-
           {/* Family overlay toggle */}
           <div className="grid-toolbar">
             <button
               className={`btn-families${showFamilies ? ' active' : ''}`}
               onClick={() => setShowFamilies(v => !v)}
-              title="Visualizar familias botánicas para planificar la rotación"
+              title={t.familiesHint}
             >
-              {showFamilies ? '🌿 Ocultar familias' : '🌿 Ver familias botánicas'}
+              {showFamilies ? `🌿 ${t.hideFamilies}` : `🌿 ${t.showFamilies}`}
             </button>
             {showFamilies && (
-              <span className="families-hint">
-                Cada color representa una familia botánica — útil para planificar la rotación de cultivos
-              </span>
+              <span className="families-hint">{t.familiesHint}</span>
             )}
           </div>
 
@@ -232,7 +239,7 @@ function OrchardInner() {
           {/* Family overlay legend */}
           {showFamilies && activeFamilies.length > 0 && (
             <div className="family-legend">
-              <span className="family-legend-title">Familias botánicas</span>
+              <span className="family-legend-title">{t.botanicalFamilies}</span>
               {activeFamilies.map(family => (
                 <span
                   key={family}
@@ -240,7 +247,7 @@ function OrchardInner() {
                   style={{ background: FAMILY_COLOR[family] ?? '#eee' }}
                 >
                   <strong>{FAMILY_ABBR[family]}</strong>
-                  {FAMILY_LABEL[family]}
+                  {t.familyNames[family]}
                 </span>
               ))}
             </div>

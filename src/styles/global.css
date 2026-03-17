@@ -18,7 +18,7 @@
   --summer-text:#7A4A10;
   --winter-tab: #D8E8F5;
   --winter-text:#1A3C5A;
-  --cell-size:  118px;
+  --cell-size:  71px;
   --radius:     6px;
   --season-bg-summer: #F5F0E4;
   --season-bg-winter: #EBF0F7;
@@ -271,7 +271,7 @@ body.winter {
 
 .cell { position: relative; } /* needed for badge positioning */
 
-.cell-emoji { font-size: 2.4rem; line-height: 1; pointer-events: none; }
+.cell-emoji { font-size: 1.5rem; line-height: 1; pointer-events: none; }
 
 .cell-name {
   font-size: 0.62rem;
@@ -573,6 +573,56 @@ body.winter {
   cursor: not-allowed;
 }
 
+/* ─── MODAL WIDE ─── */
+.modal-wide {
+  width: min(680px, 96vw);
+}
+
+/* ── Current plant bar (top of plant picker) ── */
+.current-plant-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: var(--green-pale);
+  border: 1px solid #C0D8A8;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.current-plant-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.current-plant-pill {
+  flex: 1;
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--green);
+}
+.btn-remove-inline {
+  padding: 5px 12px;
+  border: 1.5px solid var(--terra);
+  background: transparent;
+  border-radius: 5px;
+  color: var(--terra);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+  -webkit-appearance: none;
+  appearance: none;
+  flex-shrink: 0;
+}
+.btn-remove-inline:hover { background: var(--terra-pale); }
+
 /* ─── SCROLLBAR ─── */
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-track { background: transparent; }
@@ -606,9 +656,9 @@ body.winter {
   .season-btn { flex: 1; justify-content: center; }
   .year-val   { font-size: 1.7rem; min-width: 54px; }
 
-  :root { --cell-size: 80px; }
-  .cell-emoji { font-size: 1.8rem; }
-  .cell-name  { font-size: 0.56rem; max-width: 72px; }
+  :root { --cell-size: 52px; }
+  .cell-emoji { font-size: 1.1rem; }
+  .cell-name  { font-size: 0.5rem; max-width: 44px; }
 
   .overlay { align-items: flex-end; }
   .modal {
@@ -1145,7 +1195,59 @@ body.winter {
 }
 
 /* ═══════════════════════════════════════════════════════
-   APP TOOLBAR (garden selector + tabs)
+   COMMAND BAR (garden selector + tabs + controls, one row)
+═══════════════════════════════════════════════════════ */
+
+.command-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+/* Remove bottom margin from .controls when inside command-bar */
+.command-bar .controls {
+  margin-bottom: 0;
+}
+
+.command-bar-sep {
+  width: 1.5px;
+  height: 32px;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+/* ── Lang toggle ── */
+.lang-toggle {
+  display: flex;
+  align-items: center;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.lang-btn {
+  padding: 5px 9px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+  line-height: 1;
+  transition: all 0.15s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.lang-btn + .lang-btn { border-left: 1.5px solid var(--border); }
+.lang-btn.active { background: var(--green); color: #fff; }
+.lang-btn:not(.active):hover { background: var(--bg-mid); color: var(--text); }
+
+/* ═══════════════════════════════════════════════════════
+   APP TOOLBAR (kept for mobile fallback — now replaced by .command-bar)
 ═══════════════════════════════════════════════════════ */
 
 .app-toolbar {
@@ -1557,4 +1659,8 @@ body.winter {
   .gs-trigger-name { max-width: 110px; }
   .grid-toolbar { gap: 8px; }
   .families-hint { display: none; }
+  .command-bar { gap: 8px; }
+  .command-bar-sep { display: none; }
+  .command-bar .controls { width: 100%; }
+  .lang-btn { padding: 4px 7px; font-size: 0.65rem; }
 }
