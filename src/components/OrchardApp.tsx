@@ -165,10 +165,18 @@ function OrchardInner() {
           <p>{t.appSubtitle}</p>
         </div>
         <div className="header-right">
-          <span className="header-meta">
-            {syncing && <span className="sync-dot" title={t.loading} />}
-            {season === 'summer' ? `☀️ ${t.summer} ${year}` : `❄️ ${t.winter} ${year}`}
-          </span>
+          {syncing && <span className="sync-dot" title={t.loading} />}
+          <div className="header-controls">
+            <div className="year-row">
+              <button className="year-btn" onClick={() => setYear(year - 1)}>−</button>
+              <span className="year-val">{year}</span>
+              <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
+            </div>
+            <div className="season-row">
+              <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')}>☀️ {t.summer}</button>
+              <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')}>❄️ {t.winter}</button>
+            </div>
+          </div>
           <GardenSelector
             gardens={gardens}
             activeId={activeGardenId}
@@ -202,7 +210,7 @@ function OrchardInner() {
           </div>
         </div>
 
-        {/* Year, season, grid controls */}
+        {/* Controls — year+season hidden via CSS on desktop (they live in the header) */}
         <Controls
           year={year}    season={season}
           cols={cols}    rows={rows}

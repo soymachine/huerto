@@ -711,8 +711,20 @@ body.winter {
 .header-right {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
 }
+
+/* Year + season selectors living in the header */
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.header-controls .year-row { gap: 6px; }
+.header-controls .year-btn  { width: 26px; height: 26px; font-size: 0.95rem; }
+.header-controls .year-val  { font-size: 1.5rem; min-width: 52px; }
+.header-controls .season-btn { padding: 5px 12px; font-size: 0.78rem; }
 
 .header-meta {
   display: flex;
@@ -939,8 +951,9 @@ body.winter {
 
 /* ─── RESPONSIVE: auth adjustments ─── */
 @media (max-width: 640px) {
-  .header-right  { gap: 10px; }
-  .header-meta   { text-align: left; font-size: 0.7rem; }
+  .header-right  { gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+  .header-controls { display: none; }   /* year+season collapse into the unified bar on mobile */
+  .unified-bar > .controls { /* show year+season again inside the bar on mobile */ }
   .auth-modal    { width: 100%; }
   .user-dropdown {
     position: fixed;
@@ -1228,6 +1241,11 @@ body.winter {
 /* Families ctrl-block follows Controls: needs left border */
 .unified-bar > .controls + .ctrl-block {
   border-left: 1.5px solid var(--border);
+}
+
+/* Desktop: year + season live in the header — hide them from the unified-bar */
+.unified-bar > .controls > .ctrl-block:nth-child(-n+2) {
+  display: none;
 }
 
 /* ── View tabs inside unified-bar ── */
@@ -1745,6 +1763,8 @@ body.winter {
   .unified-bar > .controls { border-left: none; border-top: 1.5px solid var(--border); width: 100%; }
   .unified-bar > .controls + .ctrl-block { border-left: none; border-top: 1.5px solid var(--border); }
   .unified-bar .ctrl-block { padding: 10px 14px; }
+  /* restore year+season in the unified-bar on mobile (header-controls are hidden) */
+  .unified-bar > .controls > .ctrl-block:nth-child(-n+2) { display: flex; }
   .command-bar { gap: 8px; flex-wrap: wrap; overflow-x: visible; }
   .command-bar-sep { display: none; }
   .command-bar .controls { width: 100%; }
