@@ -2007,7 +2007,9 @@ body.winter {
 .cal-task.task-sow        { background: #E8F8D8; color: #2A5010; }
 .cal-task.task-transplant { background: #D8F4E8; color: #104030; }
 .cal-task.task-harvest    { background: #FFF8D8; color: #5A4010; }
-.cal-task-icon  { flex-shrink: 0; font-size: 0.85rem; }
+.cal-task-icon  { flex-shrink: 0; font-size: 0.85rem; display: flex; align-items: center; }
+.cal-task-icon svg { display: block; }
+.cal-leg-item svg  { display: inline-block; vertical-align: middle; margin-right: 1px; }
 .cal-task-plant { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 .cal-no-plants {

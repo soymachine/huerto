@@ -8,6 +8,41 @@ type TaskType = 'sow' | 'transplant' | 'harvest';
 interface Task { plantId: string; name: string; emoji: string; type: TaskType; }
 const TASK_ORDER: Record<TaskType, number> = { sow: 0, transplant: 1, harvest: 2 };
 
+// ─── Task icons as SVG ────────────────────────────────────────────────────────
+
+/** Sembrar: arrow pointing down into a ground line */
+function IconSow() {
+  return (
+    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="6.5" y1="1" x2="6.5" y2="9.5" />
+      <polyline points="3.5,6.5 6.5,10 9.5,6.5" />
+      <line x1="2" y1="13" x2="11" y2="13" />
+    </svg>
+  );
+}
+
+/** Transplantar: dot with a curved arrow looping around it */
+function IconTransplant() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="7" cy="7" r="1.8" fill="currentColor" stroke="none" />
+      <path d="M 7 1.5 A 5.5 5.5 0 1 1 1.5 7" />
+      <polyline points="1.5,3.5 1.5,7 5,7" />
+    </svg>
+  );
+}
+
+/** Cosechar: arrow pointing up out of a ground line */
+function IconHarvest() {
+  return (
+    <svg width="13" height="14" viewBox="0 0 13 14" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="2" y1="1" x2="11" y2="1" />
+      <line x1="6.5" y1="13" x2="6.5" y2="4.5" />
+      <polyline points="3.5,7.5 6.5,4 9.5,7.5" />
+    </svg>
+  );
+}
+
 interface Props { gardenData: GardenData; year: number; }
 
 export default function TaskCalendar({ gardenData, year }: Props) {
@@ -16,9 +51,9 @@ export default function TaskCalendar({ gardenData, year }: Props) {
   const currentMonth = today.getFullYear() === year ? today.getMonth() + 1 : null;
 
   const taskConfig = {
-    sow:        { label: t.taskSow,        icon: '🌱', cls: 'task-sow' },
-    transplant: { label: t.taskTransplant, icon: '🌿', cls: 'task-transplant' },
-    harvest:    { label: t.taskHarvest,    icon: '🌾', cls: 'task-harvest' },
+    sow:        { label: t.taskSow,        Icon: IconSow,        cls: 'task-sow' },
+    transplant: { label: t.taskTransplant, Icon: IconTransplant, cls: 'task-transplant' },
+    harvest:    { label: t.taskHarvest,    Icon: IconHarvest,    cls: 'task-harvest' },
   };
 
   const plantIds = useMemo(() => {
@@ -55,7 +90,7 @@ export default function TaskCalendar({ gardenData, year }: Props) {
     <section className="cal-wrap">
       <div className="cal-legend">
         {(Object.entries(taskConfig) as [TaskType, typeof taskConfig[TaskType]][]).map(([type, cfg]) => (
-          <span key={type} className={`cal-leg-item ${cfg.cls}`}>{cfg.icon} {cfg.label}</span>
+          <span key={type} className={`cal-leg-item ${cfg.cls}`}><cfg.Icon /> {cfg.label}</span>
         ))}
       </div>
       {hasAnyTask ? (
@@ -78,7 +113,7 @@ export default function TaskCalendar({ gardenData, year }: Props) {
                       const cfg = taskConfig[task.type];
                       return (
                         <div key={`${task.plantId}-${task.type}-${i}`} className={`cal-task ${cfg.cls}`}>
-                          <span className="cal-task-icon">{cfg.icon}</span>
+                          <span className="cal-task-icon"><cfg.Icon /></span>
                           <span className="cal-task-plant">{task.emoji} {task.name}</span>
                         </div>
                       );
