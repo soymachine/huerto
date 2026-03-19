@@ -62,14 +62,36 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
         {season === 'summer' ? `☀️ ${t.summer}` : `❄️ ${t.winter}`} {year}
       </p>
 
-      {/* ── Current plant + remove button ── */}
-      {currentPlantObj && (
+      {/* ── Current plant + date + remove button (same row) ── */}
+      {currentPlantObj ? (
         <div className="current-plant-bar">
           <span className="current-plant-label">{t.currentlyPlanted}:</span>
           <span className="current-plant-pill">
             {currentPlantObj.emoji} {lang === 'en' ? currentPlantObj.nameEn : currentPlantObj.name}
           </span>
+          <div className="current-plant-date">
+            <input
+              id="cell-date"
+              type="date"
+              className="date-input date-input-inline"
+              value={date}
+              onChange={e => onDateChange(e.target.value)}
+              title={t.plantingDate}
+            />
+            {date && (
+              <button className="date-clear-btn" onClick={() => onDateChange('')} title={t.clearDate}>✕</button>
+            )}
+          </div>
           <button className="btn-remove-inline" onClick={onRemove}>✕ {t.removePlant}</button>
+        </div>
+      ) : (
+        /* Date row for empty cells (no plant yet) */
+        <div className="empty-date-row">
+          <label className="notes-label" htmlFor="cell-date">📅 {t.plantingDate}</label>
+          <div className="date-row">
+            <input id="cell-date" type="date" className="date-input" value={date} onChange={e => onDateChange(e.target.value)} />
+            {date && <button className="date-clear-btn" onClick={() => onDateChange('')} title={t.clearDate}>✕</button>}
+          </div>
         </div>
       )}
 
@@ -120,23 +142,6 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
             </div>
           </div>
         ))}
-      </div>
-
-      {/* ── Planting date ── */}
-      <div className="notes-section date-section">
-        <label className="notes-label" htmlFor="cell-date">📅 {t.plantingDate}</label>
-        <div className="date-row">
-          <input
-            id="cell-date"
-            type="date"
-            className="date-input"
-            value={date}
-            onChange={e => onDateChange(e.target.value)}
-          />
-          {date && (
-            <button className="date-clear-btn" onClick={() => onDateChange('')} title={t.clearDate}>✕</button>
-          )}
-        </div>
       </div>
 
       {/* ── Notes ── */}

@@ -448,7 +448,7 @@ body.winter {
 
 .plant-grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(6, 1fr);
   gap: 8px;
 }
 
@@ -601,7 +601,7 @@ body.winter {
 
 /* ─── MODAL WIDE ─── */
 .modal-wide {
-  width: min(680px, 96vw);
+  width: min(860px, 96vw);
 }
 
 /* ── Current plant bar (top of plant picker) ── */
@@ -630,6 +630,32 @@ body.winter {
   font-size: 0.9rem;
   font-weight: 700;
   color: var(--green);
+  min-width: 80px;
+}
+.current-plant-date {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+.date-input-inline {
+  padding: 4px 8px;
+  font-size: 0.8rem;
+  border: 1.5px solid #C0D8A8;
+  background: rgba(255,255,255,0.7);
+}
+.date-input-inline:focus { border-color: var(--green); }
+
+/* Date row for empty cells */
+.empty-date-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.empty-date-row .notes-label {
+  margin-bottom: 0;
+  white-space: nowrap;
 }
 .btn-remove-inline {
   padding: 5px 12px;
@@ -879,7 +905,7 @@ body.winter {
   }
   .overlay.open .modal { transform: translateY(0) scale(1); }
   .modal-title  { font-size: 1.5rem; }
-  .plant-grid   { grid-template-columns: repeat(4, 1fr); }
+  .plant-grid   { grid-template-columns: repeat(3, 1fr); }
   .plant-opt    { padding: 10px 6px 8px; }
   .plant-opt-emoji { font-size: 1.5rem; }
 }
