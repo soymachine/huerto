@@ -90,7 +90,10 @@ export function useGardenData() {
   };
 
   // ── User init ────────────────────────────────────────────────────────────────
+  const initCallRef = useRef(0);
+
   const initWithUser = async (userId: string) => {
+    const callId = ++initCallRef.current;
     setSyncing(true);
     try {
       const ui = loadUIState();
@@ -98,6 +101,8 @@ export function useGardenData() {
       setSeason(ui.season);
 
       const dbGardens = await loadOrInitGardens(userId);
+      if (callId !== initCallRef.current) return; // superseded
+
       const list: GardenMeta[] = dbGardens.map(g => ({ id: g.id, name: g.name, cols: g.cols, rows: g.rows }));
       setGardens(list);
 
@@ -107,30 +112,51 @@ export function useGardenData() {
       setCols(active.cols);
       setRows(active.rows);
 
-      // One-time migration of any local data
-      const localData  = loadGardenData(active.id);
-      const localNotes = loadGardenNotes(active.id);
-      if (Object.keys(localData).length > 0) {
-        await migrateLocalData(active.id, localData);
-        clearGardenData(active.id);
-      }
-      if (Object.keys(localNotes).length > 0) {
-        await migrateLocalNotes(active.id, localNotes);
-        clearGardenNotes(active.id);
-      }
-
+      // Load DB data first — DB always wins over localStorage
       const [plantings, dbNotes] = await Promise.all([
         loadPlantings(active.id),
         fetchNotes(active.id),
       ]);
+      if (callId !== initCallRef.current) return; // superseded
+
+      if (plantings.length > 0) {
+        // DB has data → discard any stale local data for this garden
+        clearGardenData(active.id);
+        clearGardenNotes(active.id);
+      } else {
+        // DB is empty → one-time migration of local data (first login ever)
+        const localData  = loadGardenData(active.id);
+        const localNotes = loadGardenNotes(active.id);
+        if (Object.keys(localData).length > 0) {
+          await migrateLocalData(active.id, localData);
+          clearGardenData(active.id);
+        }
+        if (Object.keys(localNotes).length > 0) {
+          await migrateLocalNotes(active.id, localNotes);
+          clearGardenNotes(active.id);
+        }
+        // Reload after migration
+        const [migratedPlantings, migratedNotes] = await Promise.all([
+          loadPlantings(active.id),
+          fetchNotes(active.id),
+        ]);
+        if (callId !== initCallRef.current) return;
+        setGardenData(plantingsToGardenData(migratedPlantings));
+        setNotesData(dbNotesToNotesData(migratedNotes));
+        setDatesData(loadGardenDates(active.id));
+        return;
+      }
+
       setGardenData(plantingsToGardenData(plantings));
       setNotesData(dbNotesToNotesData(dbNotes));
       setDatesData(loadGardenDates(active.id));
     } catch (err) {
       console.error('[useGardenData] Supabase init failed:', err);
     } finally {
-      setSyncing(false);
-      setReady(true);
+      if (callId === initCallRef.current) {
+        setSyncing(false);
+        setReady(true);
+      }
     }
   };
 
