@@ -73,6 +73,7 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
             <input
               id="cell-date"
               type="date"
+              lang={lang}
               className="date-input date-input-inline"
               value={date}
               onChange={e => onDateChange(e.target.value)}
@@ -89,7 +90,7 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
         <div className="empty-date-row">
           <label className="notes-label" htmlFor="cell-date">📅 {t.plantingDate}</label>
           <div className="date-row">
-            <input id="cell-date" type="date" className="date-input" value={date} onChange={e => onDateChange(e.target.value)} />
+            <input id="cell-date" type="date" lang={lang} className="date-input" value={date} onChange={e => onDateChange(e.target.value)} />
             {date && <button className="date-clear-btn" onClick={() => onDateChange('')} title={t.clearDate}>✕</button>}
           </div>
         </div>
