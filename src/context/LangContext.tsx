@@ -72,6 +72,9 @@ export interface Translations {
   // Config panel
   settings:           string;
   language:           string;
+  // Planting date
+  plantingDate:       string;
+  clearDate:          string;
   // Print
   print:              string;
   // Reminders
@@ -171,6 +174,8 @@ const ES: Translations = {
   copySeasonConfirm:  prev => `¿Copiar el plan de ${prev} a esta temporada? Se sobreescribirá lo que haya ahora.`,
   settings:           'Configuración',
   language:           'Idioma',
+  plantingDate:       'Fecha de plantación',
+  clearDate:          'Borrar fecha',
   print:              'Imprimir',
   monthlyReminder:    'Recordatorio mensual',
   reminderHint:       'Recibe un email el 1 de cada mes con las tareas de tu huerto',
@@ -264,6 +269,8 @@ const EN: Translations = {
   copySeasonConfirm:  prev => `Copy the plan from ${prev} to this season? Current plantings will be overwritten.`,
   settings:           'Settings',
   language:           'Language',
+  plantingDate:       'Planting date',
+  clearDate:          'Clear date',
   print:              'Print',
   monthlyReminder:    'Monthly reminder',
   reminderHint:       'Receive an email on the 1st of each month with your garden tasks',

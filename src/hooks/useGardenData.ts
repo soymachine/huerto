@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
-import type { GardenData, NotesData, Season, LocalGarden } from '../lib/storage';
+import type { GardenData, NotesData, DatesData, Season, LocalGarden } from '../lib/storage';
 import {
   loadGardens, saveGardens, loadActiveId, saveActiveId,
   loadGardenData, saveGardenData, loadGardenNotes, saveGardenNotes,
+  loadGardenDates, saveGardenDates, clearGardenDates,
   clearGardenData, clearGardenNotes,
   loadUIState, saveUIState, migrateLegacy, genId,
 } from '../lib/storage';
@@ -37,6 +38,7 @@ export function useGardenData() {
   // ── Active garden data ───────────────────────────────────────────────────────
   const [gardenData, setGardenData] = useState<GardenData>({});
   const [notesData,  setNotesData]  = useState<NotesData>({});
+  const [datesData,  setDatesData]  = useState<DatesData>({});
   const [cols,       setCols]        = useState(6);
   const [rows,       setRows]        = useState(10);
 
@@ -83,6 +85,7 @@ export function useGardenData() {
     setSeason(ui.season);
     setGardenData(loadGardenData(active.id));
     setNotesData(loadGardenNotes(active.id));
+    setDatesData(loadGardenDates(active.id));
     setReady(true);
   };
 
@@ -122,6 +125,7 @@ export function useGardenData() {
       ]);
       setGardenData(plantingsToGardenData(plantings));
       setNotesData(dbNotesToNotesData(dbNotes));
+      setDatesData(loadGardenDates(active.id));
     } catch (err) {
       console.error('[useGardenData] Supabase init failed:', err);
     } finally {
@@ -140,6 +144,11 @@ export function useGardenData() {
     if (!ready || user || !activeGardenId) return;
     saveGardenNotes(activeGardenId, notesData);
   }, [notesData, ready, user, activeGardenId]);
+
+  useEffect(() => {
+    if (!ready || !activeGardenId) return;
+    saveGardenDates(activeGardenId, datesData);
+  }, [datesData, ready, activeGardenId]);
 
   // ── Always persist UI prefs ──────────────────────────────────────────────────
   useEffect(() => {
@@ -163,9 +172,11 @@ export function useGardenData() {
       const [plantings, dbNotes] = await Promise.all([loadPlantings(id), fetchNotes(id)]);
       setGardenData(plantingsToGardenData(plantings));
       setNotesData(dbNotesToNotesData(dbNotes));
+      setDatesData(loadGardenDates(id));
     } else {
       setGardenData(loadGardenData(id));
       setNotesData(loadGardenNotes(id));
+      setDatesData(loadGardenDates(id));
     }
     setSwitching(false);
   }, [gardens, user]);
@@ -189,6 +200,7 @@ export function useGardenData() {
       setRows(meta.rows);
       setGardenData({});
       setNotesData({});
+      setDatesData({});
     }
   }, [user, gardens, switchGarden]);
 
@@ -219,6 +231,7 @@ export function useGardenData() {
       saveGardens(next);
       clearGardenData(id);
       clearGardenNotes(id);
+      clearGardenDates(id);
     }
 
     if (id === activeIdRef.current) await switchGarden(next[0].id);
@@ -258,6 +271,18 @@ export function useGardenData() {
     const gid = activeIdRef.current;
     if (user && gid) await upsertNote(gid, year, season, r, c, text);
   }, [user, year, season]);
+
+  // ── Date operations ───────────────────────────────────────────────────────────
+  const setDate = useCallback((r: number, c: number, date: string) => {
+    const sk = `${year}-${season}`;
+    const ck = `${r},${c}`;
+    setDatesData(prev => {
+      const next = { ...prev, [sk]: { ...(prev[sk] ?? {}) } };
+      if (!date) delete next[sk][ck];
+      else next[sk][ck] = date;
+      return next;
+    });
+  }, [year, season]);
 
   // ── Copy previous season ─────────────────────────────────────────────────────
   const copySeason = useCallback(async (): Promise<boolean> => {
@@ -301,13 +326,13 @@ export function useGardenData() {
     gardens, activeGardenId,
     switchGarden, createGarden, renameGarden, deleteGarden,
     // Active garden data
-    gardenData, notesData,
+    gardenData, notesData, datesData,
     year,   setYear,
     season, setSeason,
     cols,   setCols: handleSetCols,
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote, copySeason,
+    setCell, setNote, setDate, copySeason,
   };
 }

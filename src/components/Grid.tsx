@@ -7,7 +7,8 @@ export interface CellWarnings {
   rotationDetail: string;
   compat:         boolean;
   compatDetail:   string;
-  hasNote:        boolean;
+  noteText:       string;   // '' if no note
+  dateText:       string;   // formatted 'dd mmm' or '' if no date
 }
 
 interface Props {
@@ -18,6 +19,8 @@ interface Props {
   getCellWarnings: (r: number, c: number) => CellWarnings;
   onCellClick:     (cell: { r: number; c: number }) => void;
 }
+
+const NOTE_PREVIEW_LEN = 80;
 
 export default function Grid({ rows, cols, showFamilies, getCell, getCellWarnings, onCellClick }: Props) {
   const { lang, t } = useLang();
@@ -37,6 +40,10 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
           const familyAbbr  = showFamilies && family ? FAMILY_ABBR[family]  : undefined;
           const familyLabel = showFamilies && family ? (t.familyNames[family] ?? family) : undefined;
           const plantName   = plant ? (lang === 'en' ? (plant.nameEn ?? plant.name) : plant.name) : null;
+
+          const noteTooltip = warnings.noteText.length > NOTE_PREVIEW_LEN
+            ? warnings.noteText.slice(0, NOTE_PREVIEW_LEN) + '… (clic para ver más)'
+            : warnings.noteText;
 
           return (
             <div
@@ -63,8 +70,8 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
                 <span className="cell-plus">+</span>
               )}
 
-              {/* ── Warning / note badges ── */}
-              {!showFamilies && (warnings.rotation || warnings.compat || warnings.hasNote) && (
+              {/* ── Warning / note / date badges ── */}
+              {!showFamilies && (warnings.rotation || warnings.compat || warnings.noteText || warnings.dateText) && (
                 <div className="cell-badges">
                   {warnings.rotation && (
                     <span className="cbadge cbadge-rot" data-tooltip={warnings.rotationDetail}>↺</span>
@@ -72,8 +79,11 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
                   {warnings.compat && (
                     <span className="cbadge cbadge-compat" data-tooltip={warnings.compatDetail}>!</span>
                   )}
-                  {warnings.hasNote && (
-                    <span className="cbadge cbadge-note" data-tooltip={t.hasNote}>✎</span>
+                  {warnings.noteText && (
+                    <span className="cbadge cbadge-note" data-tooltip={noteTooltip}>✎</span>
+                  )}
+                  {warnings.dateText && (
+                    <span className="cbadge cbadge-date" data-tooltip={warnings.dateText}>📅</span>
                   )}
                 </div>
               )}

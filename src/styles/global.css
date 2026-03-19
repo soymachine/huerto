@@ -332,6 +332,7 @@ body.winter {
 .cbadge-rot    { background: #FFF0D0; color: #C87A00; border: 1px solid #F0B040; }
 .cbadge-compat { background: #FFE8E8; color: #C83030; border: 1px solid #F09090; }
 .cbadge-note   { background: #E8F0FF; color: #3060C8; border: 1px solid #90B0F0; }
+.cbadge-date   { background: #F0F8E8; color: #2A6020; border: 1px solid #90C870; font-size: 0.55rem; }
 
 /* ── Badge tooltips ── */
 .cbadge[data-tooltip]::after {
@@ -562,6 +563,41 @@ body.winter {
 }
 .notes-input::placeholder { color: var(--muted); opacity: 0.7; }
 .notes-input:focus        { outline: none; border-color: var(--green); }
+
+.date-section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--bg-dark); }
+.date-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.date-input {
+  padding: 7px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.9rem;
+  color: var(--text);
+  transition: border-color 0.15s;
+  cursor: pointer;
+}
+.date-input:focus { outline: none; border-color: var(--green); }
+.date-clear-btn {
+  width: 26px;
+  height: 26px;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  color: var(--muted);
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.12s;
+  flex-shrink: 0;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.date-clear-btn:hover { background: var(--terra-pale); color: var(--terra); border-color: var(--terra); }
 
 .modal-footer {
   margin-top: 20px;

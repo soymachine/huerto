@@ -11,24 +11,24 @@ const sortEs = (arr: Plant[]) => [...arr].sort((a, b) => a.name.localeCompare(b.
 
 export const PLANTS: PlantCategory = {
   Verduras: sortEs([
-    { id: 'chard',      name: 'Acelga',     nameEn: 'Swiss chard',  emoji: '🫛' },
+    { id: 'chard',      name: 'Acelga',     nameEn: 'Swiss chard',  emoji: '🍃' },  // was 🫛 (dup. w/ pea)
     { id: 'garlic',     name: 'Ajo',        nameEn: 'Garlic',       emoji: '🧄' },
     { id: 'celery',     name: 'Apio',       nameEn: 'Celery',       emoji: '🌿' },
     { id: 'eggplant',   name: 'Berenjena',  nameEn: 'Aubergine',    emoji: '🍆' },
     { id: 'broccoli',   name: 'Brócoli',    nameEn: 'Broccoli',     emoji: '🥦' },
-    { id: 'zucchini',   name: 'Calabacín',  nameEn: 'Courgette',    emoji: '🥒' },
+    { id: 'zucchini',   name: 'Calabacín',  nameEn: 'Courgette',    emoji: '🍈' },  // was 🥒 (dup. w/ cucumber)
     { id: 'pumpkin',    name: 'Calabaza',   nameEn: 'Pumpkin',      emoji: '🎃' },
     { id: 'cabbage',    name: 'Col',        nameEn: 'Cabbage',      emoji: '🥬' },
     { id: 'onion',      name: 'Cebolla',    nameEn: 'Onion',        emoji: '🧅' },
     { id: 'chili',      name: 'Chile',      nameEn: 'Chilli',       emoji: '🌶️' },
-    { id: 'spinach',    name: 'Espinaca',   nameEn: 'Spinach',      emoji: '🌿' },
+    { id: 'spinach',    name: 'Espinaca',   nameEn: 'Spinach',      emoji: '🍀' },  // was 🌿 (dup. w/ celery/parsley)
     { id: 'fennel',     name: 'Hinojo',     nameEn: 'Fennel',       emoji: '🌾' },
     { id: 'bean',       name: 'Judía',      nameEn: 'Bean',         emoji: '🫘' },
-    { id: 'lettuce',    name: 'Lechuga',    nameEn: 'Lettuce',      emoji: '🥬' },
+    { id: 'lettuce',    name: 'Lechuga',    nameEn: 'Lettuce',      emoji: '🥗' },  // was 🥬 (dup. w/ cabbage)
     { id: 'corn',       name: 'Maíz',       nameEn: 'Corn',         emoji: '🌽' },
     { id: 'potato',     name: 'Patata',     nameEn: 'Potato',       emoji: '🥔' },
     { id: 'pea',        name: 'Guisante',   nameEn: 'Pea',          emoji: '🫛' },
-    { id: 'parsley',    name: 'Perejil',    nameEn: 'Parsley',      emoji: '🌿' },
+    { id: 'parsley',    name: 'Perejil',    nameEn: 'Parsley',      emoji: '☘️' }, // was 🌿 (dup. w/ celery/spinach)
     { id: 'cucumber',   name: 'Pepino',     nameEn: 'Cucumber',     emoji: '🥒' },
     { id: 'pepper',     name: 'Pimiento',   nameEn: 'Bell pepper',  emoji: '🫑' },
     { id: 'radish',     name: 'Rabanillo',  nameEn: 'Radish',       emoji: '🌱' },

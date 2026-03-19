@@ -38,13 +38,13 @@ function OrchardInner() {
   const {
     gardens, activeGardenId,
     switchGarden, createGarden, renameGarden, deleteGarden,
-    gardenData, notesData,
+    gardenData, notesData, datesData,
     year,   setYear,
     season, setSeason,
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote, copySeason,
+    setCell, setNote, setDate, copySeason,
   } = useGardenData();
 
   const [view,          setView]          = useState<View>('garden');
@@ -98,7 +98,7 @@ function OrchardInner() {
   // ── Per-cell warnings ─────────────────────────────────────────────────────
   const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
     const plantId = getCell(r, c);
-    if (!plantId) return { rotation: false, rotationDetail: '', compat: false, compatDetail: '', hasNote: false };
+    if (!plantId) return { rotation: false, rotationDetail: '', compat: false, compatDetail: '', noteText: '', dateText: '' };
 
     const prevKey     = getPreviousSeasonKey(year, season);
     const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
@@ -121,10 +121,17 @@ function OrchardInner() {
     }
     const compat       = incompatibleNeighbors.length > 0;
     const compatDetail = compat ? `! Incompatible con: ${incompatibleNeighbors.join(', ')}` : '';
-    const hasNote      = !!(notesData[seasonKey]?.[`${r},${c}`]);
+    const noteText     = notesData[seasonKey]?.[`${r},${c}`] ?? '';
 
-    return { rotation, rotationDetail, compat, compatDetail, hasNote };
-  }, [getCell, gardenData, notesData, year, season, seasonKey]);
+    const rawDate  = datesData[seasonKey]?.[`${r},${c}`] ?? '';
+    let dateText = '';
+    if (rawDate) {
+      const d = new Date(rawDate + 'T00:00:00');
+      if (!isNaN(d.getTime())) dateText = `${d.getDate()} ${t.monthsAbbr[d.getMonth()]}`;
+    }
+
+    return { rotation, rotationDetail, compat, compatDetail, noteText, dateText };
+  }, [getCell, gardenData, notesData, datesData, year, season, seasonKey, t]);
 
   // ── Modal warnings ────────────────────────────────────────────────────────
   const rotationWarning = useMemo((): RotationWarning | null => {
@@ -161,6 +168,9 @@ function OrchardInner() {
 
   const activeNote = activeCell
     ? (notesData[seasonKey]?.[`${activeCell.r},${activeCell.c}`] ?? '')
+    : '';
+  const activeDate = activeCell
+    ? (datesData[seasonKey]?.[`${activeCell.r},${activeCell.c}`] ?? '')
     : '';
 
   if (!ready) {
@@ -290,11 +300,13 @@ function OrchardInner() {
             year={year}
             currentPlant={currentPlant}
             note={activeNote}
+            date={activeDate}
             rotationWarning={rotationWarning}
             compatWarnings={compatWarnings}
             onSelect={plantId => { setCell(activeCell.r, activeCell.c, plantId); setActiveCell(null); }}
             onRemove={() =>       { setCell(activeCell.r, activeCell.c, null);   setActiveCell(null); }}
             onNoteChange={text => setNote(activeCell.r, activeCell.c, text)}
+            onDateChange={date => setDate(activeCell.r, activeCell.c, date)}
             onClose={() => setActiveCell(null)}
           />
         )}

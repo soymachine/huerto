@@ -14,15 +14,17 @@ interface Props {
   year:            number;
   currentPlant:    string | null;
   note:            string;
+  date:            string;
   rotationWarning: RotationWarning | null;
   compatWarnings:  CompatWarning[];
   onSelect:        (plantId: string) => void;
   onRemove:        () => void;
   onNoteChange:    (text: string) => void;
+  onDateChange:    (date: string) => void;
   onClose:         () => void;
 }
 
-export default function PlantModal({ cell, season, year, currentPlant, note, rotationWarning, compatWarnings, onSelect, onRemove, onNoteChange, onClose }: Props) {
+export default function PlantModal({ cell, season, year, currentPlant, note, date, rotationWarning, compatWarnings, onSelect, onRemove, onNoteChange, onDateChange, onClose }: Props) {
   const { t, lang } = useLang();
   const [infoPlantId, setInfoPlantId] = useState<string | null>(null);
   const [localNote,   setLocalNote]   = useState(note);
@@ -118,6 +120,23 @@ export default function PlantModal({ cell, season, year, currentPlant, note, rot
             </div>
           </div>
         ))}
+      </div>
+
+      {/* ── Planting date ── */}
+      <div className="notes-section date-section">
+        <label className="notes-label" htmlFor="cell-date">📅 {t.plantingDate}</label>
+        <div className="date-row">
+          <input
+            id="cell-date"
+            type="date"
+            className="date-input"
+            value={date}
+            onChange={e => onDateChange(e.target.value)}
+          />
+          {date && (
+            <button className="date-clear-btn" onClick={() => onDateChange('')} title={t.clearDate}>✕</button>
+          )}
+        </div>
       </div>
 
       {/* ── Notes ── */}

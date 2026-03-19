@@ -1,6 +1,7 @@
 export type Season     = 'summer' | 'winter';
 export type GardenData = Record<string, Record<string, string>>; // seasonKey → cellKey → plantId
 export type NotesData  = Record<string, Record<string, string>>; // seasonKey → cellKey → text
+export type DatesData  = Record<string, Record<string, string>>; // seasonKey → cellKey → ISO date
 
 export interface LocalGarden {
   id:   string;
@@ -21,6 +22,7 @@ const ACTIVE_KEY  = 'el-huerto-active';
 const UI_KEY      = 'el-huerto-ui';
 const dataKey     = (id: string) => `el-huerto-data-${id}`;
 const notesKey    = (id: string) => `el-huerto-notes-${id}`;
+const datesKey    = (id: string) => `el-huerto-dates-${id}`;
 
 // ── ID generator ──────────────────────────────────────────────────────────────
 
@@ -68,6 +70,18 @@ export function saveGardenNotes(id: string, notes: NotesData): void {
 }
 export function clearGardenNotes(id: string): void {
   try { localStorage.removeItem(notesKey(id)); } catch {}
+}
+
+// ── Garden dates ──────────────────────────────────────────────────────────────
+
+export function loadGardenDates(id: string): DatesData {
+  try { return JSON.parse(localStorage.getItem(datesKey(id)) ?? '{}'); } catch { return {}; }
+}
+export function saveGardenDates(id: string, dates: DatesData): void {
+  try { localStorage.setItem(datesKey(id), JSON.stringify(dates)); } catch {}
+}
+export function clearGardenDates(id: string): void {
+  try { localStorage.removeItem(datesKey(id)); } catch {}
 }
 
 // ── UI state (global – year + season) ────────────────────────────────────────
