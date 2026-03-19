@@ -219,21 +219,22 @@ function OrchardInner() {
         <div className="header-tabs">
           <div className="header-tabs-left">
 
-            {/* Garden tab: icon+label when active, icon-only when not */}
-            <button
-              className={`view-tab${view === 'garden' ? ' active' : ' icon-only'}`}
-              onClick={() => { setView('garden'); }}
-              title={view !== 'garden' ? t.tabGarden : undefined}
-            >⊞{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
-
-            {/* Families toggle — only visible when garden is active */}
-            {view === 'garden' && (
+            {/* Garden + Families grouped in the same frame */}
+            <div className={`tab-group${view === 'garden' ? ' tab-group-active' : ''}`}>
               <button
-                className={`view-tab${showFamilies ? ' active' : ''}`}
-                onClick={() => setShowFamilies(v => !v)}
-                title={t.familiesHint}
-              >🌿 {t.familiesLabel}</button>
-            )}
+                className={`view-tab tab-group-btn${view === 'garden' ? ' active' : ' icon-only'}`}
+                onClick={() => setView('garden')}
+                title={view !== 'garden' ? t.tabGarden : undefined}
+              >⊞{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
+
+              {view === 'garden' && (
+                <button
+                  className={`view-tab tab-group-btn${showFamilies ? ' active' : ''}`}
+                  onClick={() => setShowFamilies(v => !v)}
+                  title={t.familiesHint}
+                >🌿 {t.familiesLabel}</button>
+              )}
+            </div>
 
             {/* Copy season — only in garden view */}
             {view === 'garden' && hasPrevData && (

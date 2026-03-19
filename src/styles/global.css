@@ -1527,6 +1527,29 @@ body.winter {
 }
 .view-tab:not(.active):hover { background: var(--bg-mid); color: var(--text); }
 
+/* ── Tab group: Huerto + Familias in one frame ── */
+.tab-group {
+  display: flex;
+  align-items: stretch;
+  border: 1.5px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.tab-group-active {
+  border-color: var(--green);
+}
+.tab-group-btn {
+  border: none;
+  border-radius: 0;
+}
+.tab-group-btn + .tab-group-btn {
+  border-left: 1.5px solid var(--border);
+}
+.tab-group-active .tab-group-btn + .tab-group-btn {
+  border-left-color: var(--green);
+}
+
 /* ── Families toggle button inside unified-bar ctrl-block ── */
 .families-ctrl-btn {
   padding: 6px 13px;
