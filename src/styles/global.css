@@ -1521,6 +1521,10 @@ body.winter {
   color: var(--green);
   border-color: var(--green);
 }
+.view-tab.icon-only {
+  padding: 6px 9px;
+  color: var(--muted);
+}
 .view-tab:not(.active):hover { background: var(--bg-mid); color: var(--text); }
 
 /* ── Families toggle button inside unified-bar ctrl-block ── */

@@ -218,16 +218,35 @@ function OrchardInner() {
         {/* ── Row 2: Tabs (left) · Actions (right) ── */}
         <div className="header-tabs">
           <div className="header-tabs-left">
-            <button className={`view-tab${view === 'garden' ? ' active' : ''}`} onClick={() => setView('garden')}>🖊️ {t.tabGarden}</button>
-            <button className={`view-tab${view === 'calendar' ? ' active' : ''}`} onClick={() => setView('calendar')}>📅 {t.tabCalendar}</button>
+
+            {/* Garden tab: icon+label when active, icon-only when not */}
             <button
-              className={`view-tab${showFamilies ? ' active' : ''}`}
-              onClick={() => setShowFamilies(v => !v)}
-              title={t.familiesHint}
-            >🌿 {t.familiesLabel}</button>
-            {hasPrevData && (
+              className={`view-tab${view === 'garden' ? ' active' : ' icon-only'}`}
+              onClick={() => { setView('garden'); }}
+              title={view !== 'garden' ? t.tabGarden : undefined}
+            >🖊️{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
+
+            {/* Families toggle — only visible when garden is active */}
+            {view === 'garden' && (
+              <button
+                className={`view-tab${showFamilies ? ' active' : ''}`}
+                onClick={() => setShowFamilies(v => !v)}
+                title={t.familiesHint}
+              >🌿 {t.familiesLabel}</button>
+            )}
+
+            {/* Copy season — only in garden view */}
+            {view === 'garden' && hasPrevData && (
               <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
             )}
+
+            {/* Calendar tab: icon+label when active, icon-only when not */}
+            <button
+              className={`view-tab${view === 'calendar' ? ' active' : ' icon-only'}`}
+              onClick={() => setView('calendar')}
+              title={view !== 'calendar' ? t.tabCalendar : undefined}
+            >📅{view === 'calendar' ? ` ${t.tabCalendar}` : ''}</button>
+
           </div>
           <div className="header-tabs-right">
             <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
