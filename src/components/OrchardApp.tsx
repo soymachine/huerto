@@ -182,64 +182,64 @@ function OrchardInner() {
 
       {/* ── Header ── */}
       <header className="page-header">
-        {syncing && <span className="sync-dot" title={t.loading} />}
-        <h1 className="header-logo">{t.appTitle}</h1>
 
-        <span className="header-sep" />
+        {/* ── Row 1: Logo · Year · Season · Garden ── */}
+        <div className="header-top">
+          {syncing && <span className="sync-dot" title={t.loading} />}
+          <h1 className="header-logo">{t.appTitle}</h1>
 
-        {/* Year */}
-        <div className="year-row">
-          <button className="year-btn" onClick={() => setYear(year - 1)}>−</button>
-          <span className="year-val">{year}</span>
-          <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
+          <span className="header-sep" />
+
+          <div className="year-row">
+            <button className="year-btn" onClick={() => setYear(year - 1)}>−</button>
+            <span className="year-val">{year}</span>
+            <button className="year-btn" onClick={() => setYear(year + 1)}>+</button>
+          </div>
+
+          <span className="header-sep" />
+
+          <div className="season-row">
+            <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')} title={t.summer}>☀️</button>
+            <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')} title={t.winter}>❄️</button>
+          </div>
+
+          <span className="header-sep" />
+
+          <GardenSelector
+            gardens={gardens}
+            activeId={activeGardenId}
+            onSwitch={switchGarden}
+            onCreate={createGarden}
+            onRename={renameGarden}
+            onDelete={deleteGarden}
+          />
         </div>
 
-        {/* Season — emoji only, name as tooltip */}
-        <div className="season-row">
-          <button className={`season-btn${season === 'summer' ? ' active' : ''}`} data-s="summer" onClick={() => setSeason('summer')} title={t.summer}>☀️</button>
-          <button className={`season-btn${season === 'winter' ? ' active' : ''}`} data-s="winter" onClick={() => setSeason('winter')} title={t.winter}>❄️</button>
+        {/* ── Row 2: Tabs (left) · Actions (right) ── */}
+        <div className="header-tabs">
+          <div className="header-tabs-left">
+            <button className={`view-tab${view === 'garden' ? ' active' : ''}`} onClick={() => setView('garden')}>🖊️ {t.tabGarden}</button>
+            <button className={`view-tab${view === 'calendar' ? ' active' : ''}`} onClick={() => setView('calendar')}>📅 {t.tabCalendar}</button>
+            <button
+              className={`view-tab${showFamilies ? ' active' : ''}`}
+              onClick={() => setShowFamilies(v => !v)}
+              title={t.familiesHint}
+            >🌿 {t.familiesLabel}</button>
+            {hasPrevData && (
+              <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
+            )}
+          </div>
+          <div className="header-tabs-right">
+            <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
+            <ConfigButton
+              cols={cols} rows={rows}
+              onCols={setCols} onRows={setRows}
+              lang={lang} setLang={setLang}
+            />
+            <UserMenu onLoginClick={() => setShowAuthModal(true)} />
+          </div>
         </div>
 
-        {/* Garden selector */}
-        <GardenSelector
-          gardens={gardens}
-          activeId={activeGardenId}
-          onSwitch={switchGarden}
-          onCreate={createGarden}
-          onRename={renameGarden}
-          onDelete={deleteGarden}
-        />
-
-        <span className="header-sep" />
-
-        {/* View tabs */}
-        <button className={`view-tab${view === 'garden' ? ' active' : ''}`} onClick={() => setView('garden')}>🌱 {t.tabGarden}</button>
-        <button className={`view-tab${view === 'calendar' ? ' active' : ''}`} onClick={() => setView('calendar')}>📅 {t.tabCalendar}</button>
-
-        {/* Families toggle */}
-        <button
-          className={`families-ctrl-btn${showFamilies ? ' active' : ''}`}
-          onClick={() => setShowFamilies(v => !v)}
-          title={t.familiesHint}
-        >🌿 {t.familiesLabel}</button>
-
-        {/* Copy season (icon only) */}
-        {hasPrevData && (
-          <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
-        )}
-
-        <span className="header-sep" />
-
-        <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
-
-        {/* Config panel — grid size + language */}
-        <ConfigButton
-          cols={cols} rows={rows}
-          onCols={setCols} onRows={setRows}
-          lang={lang} setLang={setLang}
-        />
-
-        <UserMenu onLoginClick={() => setShowAuthModal(true)} />
       </header>
 
       {/* ── Print-only season header ── */}

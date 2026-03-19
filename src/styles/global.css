@@ -55,13 +55,44 @@ body.winter {
 /* ─── HEADER ─── */
 .page-header {
   display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin-bottom: 14px;
+  position: relative;
+}
+
+/* Row 1: logo · year · season · garden */
+.header-top {
+  display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 0 14px;
-  border-bottom: 1.5px solid var(--border);
-  margin-bottom: 14px;
+  padding: 10px 0 8px;
   flex-wrap: nowrap;
-  position: relative;
+}
+
+/* Row 2: tabs left · actions right */
+.header-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 0 8px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1.5px solid var(--border);
+  margin-bottom: 6px;
+}
+
+.header-tabs-left {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.header-tabs-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
 }
 
 .header-logo {
@@ -864,17 +895,15 @@ body.winter {
 @media (max-width: 640px) {
   body { padding: 16px 12px 60px; font-size: 14px; }
 
-  /* header stacks vertically on mobile */
-  .page-header {
+  /* header top row wraps on mobile */
+  .header-top {
     flex-wrap: wrap;
     gap: 6px;
-    padding: 8px 0 10px;
-    margin-bottom: 10px;
-    align-items: center;
+    padding: 8px 0 6px;
   }
 
   /* separators become full-width row breaks on mobile */
-  .page-header .header-sep {
+  .header-top .header-sep {
     width: 100%;
     height: 1px;
     background: var(--border);
@@ -882,13 +911,21 @@ body.winter {
     margin: 2px 0;
   }
 
+  /* tab bar wraps on mobile */
+  .header-tabs {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .header-tabs-left  { flex-wrap: wrap; }
+  .header-tabs-right { margin-left: auto; }
+
   /* logo on its own row, bigger touch target */
   .header-logo {
     font-size: 1.9rem;
     flex: 1 1 auto;
   }
 
-  .page-header .year-val { font-size: 1.5rem; min-width: 50px; }
+  .header-top .year-val { font-size: 1.5rem; min-width: 50px; }
   .season-btn { justify-content: center; }
 
   :root { --cell-size: 52px; }
@@ -943,14 +980,12 @@ body.winter {
 }
 
 /* compact year/season/controls inside the header */
-.page-header .year-row   { gap: 6px; flex-shrink: 0; }
-.page-header .year-btn   { width: 28px; height: 28px; font-size: 1rem; }
-.page-header .year-val   { font-size: 1.7rem; min-width: 58px; }
-.page-header .season-row { flex-shrink: 0; gap: 4px; }
-.page-header .view-tab   { flex-shrink: 0; }
-.page-header .families-ctrl-btn { flex-shrink: 0; }
-.page-header .copy-season-btn.icon-only { padding: 6px 10px; flex-shrink: 0; }
-.page-header .print-btn  { flex-shrink: 0; }
+.header-top .year-row   { gap: 6px; flex-shrink: 0; }
+.header-top .year-btn   { width: 28px; height: 28px; font-size: 1rem; }
+.header-top .year-val   { font-size: 1.7rem; min-width: 58px; }
+.header-top .season-row { flex-shrink: 0; gap: 4px; }
+.header-tabs .copy-season-btn.icon-only { padding: 5px 9px; flex-shrink: 0; }
+.header-tabs-right .print-btn { flex-shrink: 0; }
 
 /* Syncing indicator dot */
 .sync-dot {
