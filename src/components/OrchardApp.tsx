@@ -224,7 +224,7 @@ function OrchardInner() {
               className={`view-tab${view === 'garden' ? ' active' : ' icon-only'}`}
               onClick={() => { setView('garden'); }}
               title={view !== 'garden' ? t.tabGarden : undefined}
-            >🖊️{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
+            >⊞{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
 
             {/* Families toggle — only visible when garden is active */}
             {view === 'garden' && (
