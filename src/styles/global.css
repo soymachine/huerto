@@ -929,8 +929,9 @@ body.winter {
   .season-btn { justify-content: center; }
 
   :root { --cell-size: 52px; }
-  .cell-emoji { font-size: 1.1rem; }
-  .cell-name  { font-size: 0.5rem; max-width: 44px; }
+  .cell { gap: 1px; padding-bottom: 13px; }
+  .cell-emoji { font-size: 0.95rem; }
+  .cell-name  { font-size: 0.44rem; max-width: 44px; }
 
   .overlay { align-items: flex-end; }
   .modal {
