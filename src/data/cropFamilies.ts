@@ -3,71 +3,99 @@ import type { Season } from '../lib/storage';
 // ─── Botanical family for each plant ─────────────────────────────────────────
 
 export const CROP_FAMILY: Record<string, string> = {
-  tomato:     'solanaceae',
-  chili:      'solanaceae',
-  pepper:     'solanaceae',
-  eggplant:   'solanaceae',
-  potato:     'solanaceae',
-  zucchini:   'cucurbit',
-  cucumber:   'cucurbit',
-  pumpkin:    'cucurbit',
-  cabbage:    'brassica',
-  broccoli:   'brassica',
-  radish:     'brassica',
-  carrot:     'apiaceae',
-  celery:     'apiaceae',
-  parsley:    'apiaceae',
-  fennel:     'apiaceae',
-  onion:      'allium',
-  garlic:     'allium',
-  bean:       'legume',
-  pea:        'legume',
-  lettuce:    'asteraceae',
-  corn:       'grass',
-  chard:      'chenopod',
-  spinach:    'chenopod',
-  strawberry: 'rosaceae',
+  // Solanáceas
+  tomato:      'solanaceae',
+  chili:       'solanaceae',
+  pepper:      'solanaceae',
+  eggplant:    'solanaceae',
+  potato:      'solanaceae',
+  // Cucurbitáceas
+  zucchini:    'cucurbit',
+  cucumber:    'cucurbit',
+  pumpkin:     'cucurbit',
+  melon:       'cucurbit',
+  watermelon:  'cucurbit',
+  // Crucíferas / Brassicaceae
+  cabbage:     'brassica',
+  broccoli:    'brassica',
+  cauliflower: 'brassica',
+  radish:      'brassica',
+  turnip:      'brassica',
+  // Umbelíferas / Apiaceae
+  carrot:      'apiaceae',
+  celery:      'apiaceae',
+  parsley:     'apiaceae',
+  fennel:      'apiaceae',
+  // Liliáceas / Allium
+  onion:       'allium',
+  garlic:      'allium',
+  leek:        'allium',
+  // Leguminosas
+  bean:        'legume',
+  pea:         'legume',
+  fava:        'legume',
+  // Compuestas / Asteraceae
+  lettuce:     'asteraceae',
+  artichoke:   'asteraceae',
+  // Gramíneas
+  corn:        'grass',
+  // Quenopodiáceas / Amaranthaceae
+  chard:       'chenopod',
+  spinach:     'chenopod',
+  beet:        'chenopod',
+  // Rosáceas
+  strawberry:  'rosaceae',
+  // Boragináceas
+  borage:      'boraginaceae',
+  // Labiadas / Lamiaceae
+  basil:       'lamiaceae',
 };
 
 // ─── Family display colours (used for the rotation overlay on the grid) ───────
 
 export const FAMILY_COLOR: Record<string, string> = {
-  solanaceae:  '#FFE5D5',
-  cucurbit:    '#FFF5CE',
-  brassica:    '#DFF0D8',
-  apiaceae:    '#D5E8F5',
-  allium:      '#EDE5FA',
-  legume:      '#FAFAD0',
-  asteraceae:  '#FFF8D8',
-  grass:       '#E5F5E5',
-  chenopod:    '#D5F5EC',
-  rosaceae:    '#FAE0E8',
+  solanaceae:   '#FFE5D5',
+  cucurbit:     '#FFF5CE',
+  brassica:     '#DFF0D8',
+  apiaceae:     '#D5E8F5',
+  allium:       '#EDE5FA',
+  legume:       '#FAFAD0',
+  asteraceae:   '#FFF8D8',
+  grass:        '#E5F5E5',
+  chenopod:     '#D5F5EC',
+  rosaceae:     '#FAE0E8',
+  boraginaceae: '#D8E8FF',
+  lamiaceae:    '#F5E8FF',
 };
 
 export const FAMILY_ABBR: Record<string, string> = {
-  solanaceae:  'SOL',
-  cucurbit:    'CUC',
-  brassica:    'BRA',
-  apiaceae:    'API',
-  allium:      'ALL',
-  legume:      'LEG',
-  asteraceae:  'AST',
-  grass:       'GRA',
-  chenopod:    'CHE',
-  rosaceae:    'ROS',
+  solanaceae:   'SOL',
+  cucurbit:     'CUC',
+  brassica:     'BRA',
+  apiaceae:     'API',
+  allium:       'ALL',
+  legume:       'LEG',
+  asteraceae:   'AST',
+  grass:        'GRA',
+  chenopod:     'CHE',
+  rosaceae:     'ROS',
+  boraginaceae: 'BOR',
+  lamiaceae:    'LAM',
 };
 
 export const FAMILY_LABEL: Record<string, string> = {
-  solanaceae:  'Solanácea',
-  cucurbit:    'Cucurbitácea',
-  brassica:    'Crucífera',
-  apiaceae:    'Umbelífera',
-  allium:      'Liliácea',
-  legume:      'Leguminosa',
-  asteraceae:  'Compuesta',
-  grass:       'Gramínea',
-  chenopod:    'Quenopodiácea',
-  rosaceae:    'Rosácea',
+  solanaceae:   'Solanácea',
+  cucurbit:     'Cucurbitácea',
+  brassica:     'Crucífera',
+  apiaceae:     'Umbelífera',
+  allium:       'Liliácea',
+  legume:       'Leguminosa',
+  asteraceae:   'Compuesta',
+  grass:        'Gramínea',
+  chenopod:     'Quenopodiácea',
+  rosaceae:     'Rosácea',
+  boraginaceae: 'Boraginacea',
+  lamiaceae:    'Labiada',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
