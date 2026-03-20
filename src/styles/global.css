@@ -299,6 +299,20 @@ body.winter {
   z-index: 100;
 }
 
+/* ── Drag & drop states ── */
+.cell[draggable="true"] { cursor: grab; }
+.cell[draggable="true"]:active { cursor: grabbing; }
+.cell.cell-drag-src {
+  opacity: 0.35;
+  transform: scale(0.94);
+}
+.cell.cell-drag-over {
+  border-color: var(--green-main) !important;
+  border-style: solid !important;
+  box-shadow: 0 0 0 2px var(--green-main);
+  background: color-mix(in srgb, var(--green-main) 12%, var(--card));
+}
+
 .cell:hover {
   border-color: var(--green-mid);
   border-style: solid;

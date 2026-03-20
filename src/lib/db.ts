@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { GardenData, NotesData } from './storage';
+import type { GardenData, NotesData, DatesData } from './storage';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -20,6 +20,7 @@ export interface Planting {
   row_idx: number;
   col_idx: number;
   plant_id: string;
+  planted_at?: string | null; // ISO date 'YYYY-MM-DD'
 }
 
 export interface DbNote {
@@ -103,9 +104,13 @@ export async function upsertPlanting(
   rowIdx: number,
   colIdx: number,
   plantId: string,
+  plantedAt?: string, // 'YYYY-MM-DD' or '' to clear
 ): Promise<void> {
   await supabase.from('plantings').upsert(
-    { garden_id: gardenId, year, season, row_idx: rowIdx, col_idx: colIdx, plant_id: plantId },
+    {
+      garden_id: gardenId, year, season, row_idx: rowIdx, col_idx: colIdx, plant_id: plantId,
+      ...(plantedAt !== undefined ? { planted_at: plantedAt || null } : {}),
+    },
     { onConflict: 'garden_id,year,season,row_idx,col_idx' },
   );
 }
@@ -266,6 +271,17 @@ export function plantingsToGardenData(plantings: Planting[]): GardenData {
     const sk = `${p.year}-${p.season}`;
     if (!result[sk]) result[sk] = {};
     result[sk][`${p.row_idx},${p.col_idx}`] = p.plant_id;
+  }
+  return result;
+}
+
+export function plantingsToDatesData(plantings: Planting[]): DatesData {
+  const result: DatesData = {};
+  for (const p of plantings) {
+    if (!p.planted_at) continue;
+    const sk = `${p.year}-${p.season}`;
+    if (!result[sk]) result[sk] = {};
+    result[sk][`${p.row_idx},${p.col_idx}`] = p.planted_at;
   }
   return result;
 }

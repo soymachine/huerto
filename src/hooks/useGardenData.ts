@@ -15,7 +15,7 @@ import {
   deleteGarden  as dbDeleteGarden,
   loadPlantings, upsertPlanting, removePlanting, bulkUpsertPlantings,
   migrateLocalData, migrateLocalNotes,
-  updateGardenSize, plantingsToGardenData,
+  updateGardenSize, plantingsToGardenData, plantingsToDatesData,
   fetchNotes, upsertNote, dbNotesToNotesData,
 } from '../lib/db';
 
@@ -143,13 +143,13 @@ export function useGardenData() {
         if (callId !== initCallRef.current) return;
         setGardenData(plantingsToGardenData(migratedPlantings));
         setNotesData(dbNotesToNotesData(migratedNotes));
-        setDatesData(loadGardenDates(active.id));
+        setDatesData(plantingsToDatesData(migratedPlantings));
         return;
       }
 
       setGardenData(plantingsToGardenData(plantings));
       setNotesData(dbNotesToNotesData(dbNotes));
-      setDatesData(loadGardenDates(active.id));
+      setDatesData(plantingsToDatesData(plantings));
     } catch (err) {
       console.error('[useGardenData] Supabase init failed:', err);
     } finally {
@@ -277,8 +277,13 @@ export function useGardenData() {
 
     const gid = activeIdRef.current;
     if (user && gid) {
-      if (plantId === null) await removePlanting(gid, year, season, r, c);
-      else                  await upsertPlanting(gid, year, season, r, c, plantId);
+      if (plantId === null) {
+        await removePlanting(gid, year, season, r, c);
+      } else {
+        // Include any existing planting date so it survives plant changes
+        const currentDate = datesData[sk]?.[ck] ?? '';
+        await upsertPlanting(gid, year, season, r, c, plantId, currentDate);
+      }
     }
   };
 
@@ -299,7 +304,7 @@ export function useGardenData() {
   }, [user, year, season]);
 
   // ── Date operations ───────────────────────────────────────────────────────────
-  const setDate = useCallback((r: number, c: number, date: string) => {
+  const setDate = useCallback(async (r: number, c: number, date: string) => {
     const sk = `${year}-${season}`;
     const ck = `${r},${c}`;
     setDatesData(prev => {
@@ -308,7 +313,59 @@ export function useGardenData() {
       else next[sk][ck] = date;
       return next;
     });
-  }, [year, season]);
+    // Persist to DB: update planted_at on the existing planting row (if any)
+    const gid = activeIdRef.current;
+    if (user && gid) {
+      const plantId = gardenData[sk]?.[ck];
+      if (plantId) await upsertPlanting(gid, year, season, r, c, plantId, date);
+      // If no plant yet, date will be included when setCell is called
+    }
+  }, [user, year, season, gardenData]);
+
+  // ── Move cell (drag & drop) ───────────────────────────────────────────────────
+  const moveCell = useCallback(async (
+    from: { r: number; c: number },
+    to:   { r: number; c: number },
+  ) => {
+    const sk    = `${year}-${season}`;
+    const fromCk = `${from.r},${from.c}`;
+    const toCk   = `${to.r},${to.c}`;
+
+    const fromPlant = gardenData[sk]?.[fromCk] ?? null;
+    const fromNote  = notesData[sk]?.[fromCk]  ?? '';
+    const fromDate  = datesData[sk]?.[fromCk]  ?? '';
+
+    if (!fromPlant) return; // nothing to move
+
+    setGardenData(prev => {
+      const cells = { ...(prev[sk] ?? {}) };
+      delete cells[fromCk];
+      cells[toCk] = fromPlant;
+      return { ...prev, [sk]: cells };
+    });
+    setNotesData(prev => {
+      const cells = { ...(prev[sk] ?? {}) };
+      delete cells[fromCk];
+      delete cells[toCk];
+      if (fromNote.trim()) cells[toCk] = fromNote;
+      return { ...prev, [sk]: cells };
+    });
+    setDatesData(prev => {
+      const cells = { ...(prev[sk] ?? {}) };
+      delete cells[fromCk];
+      delete cells[toCk];
+      if (fromDate) cells[toCk] = fromDate;
+      return { ...prev, [sk]: cells };
+    });
+
+    const gid = activeIdRef.current;
+    if (user && gid) {
+      await removePlanting(gid, year, season, from.r, from.c);
+      await upsertNote(gid, year, season, from.r, from.c, '');
+      await upsertPlanting(gid, year, season, to.r, to.c, fromPlant, fromDate);
+      if (fromNote.trim()) await upsertNote(gid, year, season, to.r, to.c, fromNote);
+    }
+  }, [gardenData, notesData, datesData, year, season, user]);
 
   // ── Copy previous season ─────────────────────────────────────────────────────
   const copySeason = useCallback(async (): Promise<boolean> => {
@@ -359,6 +416,6 @@ export function useGardenData() {
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote, setDate, copySeason,
+    setCell, setNote, setDate, moveCell, copySeason,
   };
 }

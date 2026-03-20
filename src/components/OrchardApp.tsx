@@ -44,7 +44,7 @@ function OrchardInner() {
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote, setDate, copySeason,
+    setCell, setNote, setDate, moveCell, copySeason,
   } = useGardenData();
 
   const [view,          setView]          = useState<View>('garden');
@@ -279,6 +279,7 @@ function OrchardInner() {
               getCell={getCell}
               getCellWarnings={getCellWarnings}
               onCellClick={setActiveCell}
+              onCellMove={moveCell}
             />
           </div>
 

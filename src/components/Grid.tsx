@@ -20,6 +20,7 @@ interface Props {
   getCell:         (r: number, c: number) => string | null;
   getCellWarnings: (r: number, c: number) => CellWarnings;
   onCellClick:     (cell: { r: number; c: number }) => void;
+  onCellMove?:     (from: { r: number; c: number }, to: { r: number; c: number }) => void;
 }
 
 interface TooltipState { text: string; x: number; y: number; }
@@ -70,9 +71,11 @@ function TooltipPortal({ tip }: { tip: TooltipState | null }) {
   );
 }
 
-export default function Grid({ rows, cols, showFamilies, getCell, getCellWarnings, onCellClick }: Props) {
+export default function Grid({ rows, cols, showFamilies, getCell, getCellWarnings, onCellClick, onCellMove }: Props) {
   const { lang, t } = useLang();
-  const [tooltip, setTooltip] = useState<TooltipState | null>(null);
+  const [tooltip,  setTooltip]  = useState<TooltipState | null>(null);
+  const [dragSrc,  setDragSrc]  = useState<{ r: number; c: number } | null>(null);
+  const [dragOver, setDragOver] = useState<{ r: number; c: number } | null>(null);
 
   const showTip = useCallback((t: TooltipState) => setTooltip(t), []);
   const hideTip = useCallback(() => setTooltip(null), []);
@@ -99,17 +102,46 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
               ? warnings.noteText.slice(0, NOTE_PREVIEW_LEN) + '… (clic para ver más)'
               : warnings.noteText;
 
+            const isDragSrc  = dragSrc?.r  === r && dragSrc?.c  === c;
+            const isDragOver = dragOver?.r === r && dragOver?.c === c;
+
             return (
               <div
                 key={`${r}-${c}`}
-                className={`cell${plant ? ' has-plant' : ''}${showFamilies && family ? ' family-mode' : ''}`}
+                className={`cell${plant ? ' has-plant' : ''}${showFamilies && family ? ' family-mode' : ''}${isDragSrc ? ' cell-drag-src' : ''}${isDragOver ? ' cell-drag-over' : ''}`}
                 style={familyColor ? { background: familyColor, borderColor: familyColor } : undefined}
                 title={
                   showFamilies && familyLabel
                     ? `${plantName ?? ''} · ${familyLabel}`
                     : plantName ?? t.clickToPlant
                 }
-                onClick={() => onCellClick({ r, c })}
+                draggable={!!plant && !!onCellMove}
+                onDragStart={plant && onCellMove ? (e) => {
+                  setDragSrc({ r, c });
+                  e.dataTransfer.effectAllowed = 'move';
+                  // Prevent tooltip from sticking during drag
+                  hideTip();
+                } : undefined}
+                onDragOver={onCellMove ? (e) => {
+                  if (!dragSrc || (dragSrc.r === r && dragSrc.c === c)) return;
+                  e.preventDefault();
+                  e.dataTransfer.dropEffect = 'move';
+                  setDragOver({ r, c });
+                } : undefined}
+                onDragLeave={onCellMove ? () => setDragOver(null) : undefined}
+                onDrop={onCellMove ? (e) => {
+                  e.preventDefault();
+                  if (dragSrc && (dragSrc.r !== r || dragSrc.c !== c)) {
+                    onCellMove(dragSrc, { r, c });
+                  }
+                  setDragSrc(null);
+                  setDragOver(null);
+                } : undefined}
+                onDragEnd={onCellMove ? () => {
+                  setDragSrc(null);
+                  setDragOver(null);
+                } : undefined}
+                onClick={() => { if (!dragSrc) onCellClick({ r, c }); }}
               >
                 {plant ? (
                   <>
