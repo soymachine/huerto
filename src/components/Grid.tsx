@@ -145,9 +145,9 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
                 )}
 
                 {/* ── Warning / note / date badges ── */}
-                {(warnings.rotation || warnings.noteText || warnings.dateText || (showAssociations && (warnings.compat || warnings.good))) && (
+                {((!showAssociations && (warnings.rotation || warnings.noteText || warnings.dateText)) || (showAssociations && (warnings.compat || warnings.good))) && (
                   <div className="cell-badges">
-                    {warnings.rotation && (
+                    {!showAssociations && warnings.rotation && (
                       <Badge cls="cbadge-rot" label="↺" tip={warnings.rotationDetail} onShow={showTip} onHide={hideTip} />
                     )}
                     {showAssociations && warnings.compat && (
@@ -156,10 +156,10 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
                     {showAssociations && warnings.good && (
                       <Badge cls="cbadge-good" label="✓" tip={warnings.goodDetail} onShow={showTip} onHide={hideTip} />
                     )}
-                    {warnings.noteText && (
+                    {!showAssociations && warnings.noteText && (
                       <Badge cls="cbadge-note" label="✎" tip={noteTooltip} onShow={showTip} onHide={hideTip} />
                     )}
-                    {warnings.dateText && (
+                    {!showAssociations && warnings.dateText && (
                       <Badge cls="cbadge-date" label="📅" tip={warnings.dateText} onShow={showTip} onHide={hideTip} />
                     )}
                   </div>
