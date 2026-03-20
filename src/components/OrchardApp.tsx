@@ -5,7 +5,8 @@ import { LangProvider, useLang } from '../context/LangContext';
 import { useGardenData }  from '../hooks/useGardenData';
 import { findPlant }      from '../data/plants';
 import { PLANT_INFO }     from '../data/plantInfo';
-import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
+import { CROP_FAMILY, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
+import AssociationsTable from './AssociationsTable';
 import type { CellWarnings }                  from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
 import Grid           from './Grid';
@@ -47,10 +48,11 @@ function OrchardInner() {
     setCell, setNote, setDate, moveCell, copySeason,
   } = useGardenData();
 
-  const [view,          setView]          = useState<View>('garden');
-  const [activeCell,    setActiveCell]    = useState<{ r: number; c: number } | null>(null);
-  const [showAuthModal, setShowAuthModal] = useState(false);
-  const [showFamilies,  setShowFamilies]  = useState(false);
+  const [view,             setView]             = useState<View>('garden');
+  const [activeCell,       setActiveCell]       = useState<{ r: number; c: number } | null>(null);
+  const [showAuthModal,    setShowAuthModal]    = useState(false);
+  const [showAssociations, setShowAssociations] = useState(false);
+  const [showAssocTable,   setShowAssocTable]   = useState(false);
 
   // ── Previous season data ───────────────────────────────────────────────────
   const prevSeasonKey = season === 'summer' ? `${year - 1}-winter` : `${year}-summer`;
@@ -72,7 +74,7 @@ function OrchardInner() {
   // ── Escape key ────────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setActiveCell(null); setShowAuthModal(false); }
+      if (e.key === 'Escape') { setActiveCell(null); setShowAuthModal(false); setShowAssocTable(false); }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -87,18 +89,10 @@ function OrchardInner() {
   const currentPlant = activeCell ? getCell(activeCell.r, activeCell.c) : null;
   const planted      = gardenData[seasonKey] ? Object.values(gardenData[seasonKey]) : [];
 
-  const activeFamilies = useMemo(() => {
-    const seen = new Set<string>();
-    planted.forEach(id => { const f = CROP_FAMILY[id]; if (f) seen.add(f); });
-    return [...seen].sort((a, b) =>
-      (t.familyNames[a] ?? a).localeCompare(t.familyNames[b] ?? b),
-    );
-  }, [planted, t]);
-
   // ── Per-cell warnings ─────────────────────────────────────────────────────
   const getCellWarnings = useCallback((r: number, c: number): CellWarnings => {
     const plantId = getCell(r, c);
-    if (!plantId) return { rotation: false, rotationDetail: '', compat: false, compatDetail: '', noteText: '', dateText: '' };
+    if (!plantId) return { rotation: false, rotationDetail: '', compat: false, compatDetail: '', good: false, goodDetail: '', noteText: '', dateText: '' };
 
     const prevKey     = getPreviousSeasonKey(year, season);
     const prevPlantId = gardenData[prevKey]?.[`${r},${c}`] ?? null;
@@ -121,6 +115,21 @@ function OrchardInner() {
     }
     const compat       = incompatibleNeighbors.length > 0;
     const compatDetail = compat ? `! Incompatible con: ${incompatibleNeighbors.join(', ')}` : '';
+
+    const goodNeighbors: string[] = [];
+    if (info) {
+      [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr, dc]) => {
+        const nId = getCell(r + dr, c + dc);
+        if (!nId) return;
+        if (info.companions.includes(nId) || PLANT_INFO[nId]?.companions.includes(plantId)) {
+          const name = findPlant(nId)?.name;
+          if (name && !goodNeighbors.includes(name)) goodNeighbors.push(name);
+        }
+      });
+    }
+    const good       = goodNeighbors.length > 0;
+    const goodDetail = good ? `✓ Buena asociación con: ${goodNeighbors.join(', ')}` : '';
+
     const noteText     = notesData[seasonKey]?.[`${r},${c}`] ?? '';
 
     const rawDate  = datesData[seasonKey]?.[`${r},${c}`] ?? '';
@@ -130,7 +139,7 @@ function OrchardInner() {
       if (!isNaN(d.getTime())) dateText = `${d.getDate()} ${t.monthsAbbr[d.getMonth()]}`;
     }
 
-    return { rotation, rotationDetail, compat, compatDetail, noteText, dateText };
+    return { rotation, rotationDetail, compat, compatDetail, good, goodDetail, noteText, dateText };
   }, [getCell, gardenData, notesData, datesData, year, season, seasonKey, t]);
 
   // ── Modal warnings ────────────────────────────────────────────────────────
@@ -228,11 +237,20 @@ function OrchardInner() {
               >⊞{view === 'garden' ? ` ${t.tabGarden}` : ''}</button>
 
               {view === 'garden' && (
-                <button
-                  className={`view-tab tab-group-btn${showFamilies ? ' active' : ''}`}
-                  onClick={() => setShowFamilies(v => !v)}
-                  title={t.familiesHint}
-                >🌿 {t.familiesLabel}</button>
+                <>
+                  <button
+                    className={`view-tab tab-group-btn${showAssociations ? ' active' : ''}`}
+                    onClick={() => setShowAssociations(v => !v)}
+                    title={t.tabAssociations}
+                  >🤝 {t.tabAssociations}</button>
+                  {showAssociations && (
+                    <button
+                      className="view-tab tab-group-btn"
+                      onClick={() => setShowAssocTable(true)}
+                      title={t.assocTableTitle}
+                    >⊞ {t.assocTableTitle}</button>
+                  )}
+                </>
               )}
             </div>
 
@@ -275,30 +293,13 @@ function OrchardInner() {
             <Grid
               rows={rows}
               cols={cols}
-              showFamilies={showFamilies}
+              showAssociations={showAssociations}
               getCell={getCell}
               getCellWarnings={getCellWarnings}
               onCellClick={setActiveCell}
               onCellMove={moveCell}
             />
           </div>
-
-          {/* Family overlay legend */}
-          {showFamilies && activeFamilies.length > 0 && (
-            <div className="family-legend">
-              <span className="family-legend-title">{t.botanicalFamilies}</span>
-              {activeFamilies.map(family => (
-                <span
-                  key={family}
-                  className="family-legend-chip"
-                  style={{ background: FAMILY_COLOR[family] ?? '#eee' }}
-                >
-                  <strong>{FAMILY_ABBR[family]}</strong>
-                  {t.familyNames[family]}
-                </span>
-              ))}
-            </div>
-          )}
 
           <Legend planted={planted} />
         </>
@@ -340,6 +341,11 @@ function OrchardInner() {
       >
         {showAuthModal && <AuthModal onClose={() => setShowAuthModal(false)} />}
       </div>
+
+      {/* ── Associations table overlay ── */}
+      {showAssocTable && (
+        <AssociationsTable onClose={() => setShowAssocTable(false)} />
+      )}
 
     </div>
   );

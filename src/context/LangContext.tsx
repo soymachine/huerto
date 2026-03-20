@@ -107,6 +107,10 @@ export interface Translations {
   companions:         string;
   avoid:              string;
   tip:                string;
+  tabAssociations:    string;
+  assocTableTitle:    string;
+  assocGood:          string;
+  assocBad:           string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,6 +209,10 @@ const ES: Translations = {
   companions:         'Plantas compañeras',
   avoid:              'Evitar junto a',
   tip:                'Consejo',
+  tabAssociations:    'Asociaciones',
+  assocTableTitle:    'Tabla de asociaciones',
+  assocGood:          'Buena asociación',
+  assocBad:           'Incompatible',
 };
 
 const EN: Translations = {
@@ -301,6 +309,10 @@ const EN: Translations = {
   companions:         'Companion plants',
   avoid:              'Avoid near',
   tip:                'Tip',
+  tabAssociations:    'Associations',
+  assocTableTitle:    'Associations table',
+  assocGood:          'Good companion',
+  assocBad:           'Incompatible',
 };
 
 export const TRANSLATIONS: Record<Lang, Translations> = { es: ES, en: EN };

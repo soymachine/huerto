@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { findPlant } from '../data/plants';
-import { CROP_FAMILY, FAMILY_COLOR, FAMILY_ABBR } from '../data/cropFamilies';
 import { useLang } from '../context/LangContext';
 
 export interface CellWarnings {
@@ -9,18 +8,20 @@ export interface CellWarnings {
   rotationDetail: string;
   compat:         boolean;
   compatDetail:   string;
+  good:           boolean;   // has compatible neighbor nearby
+  goodDetail:     string;    // "✓ Buena asociación con: X, Y"
   noteText:       string;   // '' if no note
   dateText:       string;   // formatted 'dd mmm' or '' if no date
 }
 
 interface Props {
-  rows:            number;
-  cols:            number;
-  showFamilies:    boolean;
-  getCell:         (r: number, c: number) => string | null;
-  getCellWarnings: (r: number, c: number) => CellWarnings;
-  onCellClick:     (cell: { r: number; c: number }) => void;
-  onCellMove?:     (from: { r: number; c: number }, to: { r: number; c: number }) => void;
+  rows:             number;
+  cols:             number;
+  showAssociations: boolean;
+  getCell:          (r: number, c: number) => string | null;
+  getCellWarnings:  (r: number, c: number) => CellWarnings;
+  onCellClick:      (cell: { r: number; c: number }) => void;
+  onCellMove?:      (from: { r: number; c: number }, to: { r: number; c: number }) => void;
 }
 
 interface TooltipState { text: string; x: number; y: number; }
@@ -71,7 +72,7 @@ function TooltipPortal({ tip }: { tip: TooltipState | null }) {
   );
 }
 
-export default function Grid({ rows, cols, showFamilies, getCell, getCellWarnings, onCellClick, onCellMove }: Props) {
+export default function Grid({ rows, cols, showAssociations, getCell, getCellWarnings, onCellClick, onCellMove }: Props) {
   const { lang, t } = useLang();
   const [tooltip,  setTooltip]  = useState<TooltipState | null>(null);
   const [dragSrc,  setDragSrc]  = useState<{ r: number; c: number } | null>(null);
@@ -92,11 +93,7 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
             const plant    = plantId ? findPlant(plantId) : null;
             const warnings = getCellWarnings(r, c);
 
-            const family      = plantId ? CROP_FAMILY[plantId] : null;
-            const familyColor = showFamilies && family ? FAMILY_COLOR[family] : undefined;
-            const familyAbbr  = showFamilies && family ? FAMILY_ABBR[family]  : undefined;
-            const familyLabel = showFamilies && family ? (t.familyNames[family] ?? family) : undefined;
-            const plantName   = plant ? (lang === 'en' ? (plant.nameEn ?? plant.name) : plant.name) : null;
+            const plantName = plant ? (lang === 'en' ? (plant.nameEn ?? plant.name) : plant.name) : null;
 
             const noteTooltip = warnings.noteText.length > NOTE_PREVIEW_LEN
               ? warnings.noteText.slice(0, NOTE_PREVIEW_LEN) + '… (clic para ver más)'
@@ -108,13 +105,8 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
             return (
               <div
                 key={`${r}-${c}`}
-                className={`cell${plant ? ' has-plant' : ''}${showFamilies && family ? ' family-mode' : ''}${isDragSrc ? ' cell-drag-src' : ''}${isDragOver ? ' cell-drag-over' : ''}`}
-                style={familyColor ? { background: familyColor, borderColor: familyColor } : undefined}
-                title={
-                  showFamilies && familyLabel
-                    ? `${plantName ?? ''} · ${familyLabel}`
-                    : plantName ?? t.clickToPlant
-                }
+                className={`cell${plant ? ' has-plant' : ''}${isDragSrc ? ' cell-drag-src' : ''}${isDragOver ? ' cell-drag-over' : ''}`}
+                title={plantName ?? t.clickToPlant}
                 draggable={!!plant && !!onCellMove}
                 onDragStart={plant && onCellMove ? (e) => {
                   setDragSrc({ r, c });
@@ -146,24 +138,23 @@ export default function Grid({ rows, cols, showFamilies, getCell, getCellWarning
                 {plant ? (
                   <>
                     <span className="cell-emoji">{plant.emoji}</span>
-                    {showFamilies && familyAbbr ? (
-                      <span className="cell-family-abbr">{familyAbbr}</span>
-                    ) : (
-                      <span className="cell-name">{plantName}</span>
-                    )}
+                    <span className="cell-name">{plantName}</span>
                   </>
                 ) : (
                   <span className="cell-plus">+</span>
                 )}
 
                 {/* ── Warning / note / date badges ── */}
-                {!showFamilies && (warnings.rotation || warnings.compat || warnings.noteText || warnings.dateText) && (
+                {(warnings.rotation || warnings.noteText || warnings.dateText || (showAssociations && (warnings.compat || warnings.good))) && (
                   <div className="cell-badges">
                     {warnings.rotation && (
                       <Badge cls="cbadge-rot" label="↺" tip={warnings.rotationDetail} onShow={showTip} onHide={hideTip} />
                     )}
-                    {warnings.compat && (
+                    {showAssociations && warnings.compat && (
                       <Badge cls="cbadge-compat" label="!" tip={warnings.compatDetail} onShow={showTip} onHide={hideTip} />
+                    )}
+                    {showAssociations && warnings.good && (
+                      <Badge cls="cbadge-good" label="✓" tip={warnings.goodDetail} onShow={showTip} onHide={hideTip} />
                     )}
                     {warnings.noteText && (
                       <Badge cls="cbadge-note" label="✎" tip={noteTooltip} onShow={showTip} onHide={hideTip} />
