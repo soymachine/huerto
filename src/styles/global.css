@@ -2127,8 +2127,8 @@ body.winter {
 }
 .assoc-col-header {
   padding: 0;
-  vertical-align: bottom;
-  height: 120px;
+  vertical-align: middle;
+  height: auto;
   width: 28px; min-width: 28px;
   position: sticky; top: 0;
   background: #fff;
@@ -2137,14 +2137,15 @@ body.winter {
 }
 .assoc-col-label {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  justify-content: flex-end;
-  height: 120px;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  gap: 3px;
-  padding-bottom: 4px;
+  justify-content: flex-start;
+  height: auto;
+  writing-mode: initial;
+  transform: none;
+  gap: 6px;
+  padding: 8px 10px;
+  white-space: nowrap;
 }
 .assoc-col-emoji { font-size: 1rem; line-height: 1; }
 .assoc-col-name  { font-size: 0.65rem; white-space: nowrap; color: #333; }
