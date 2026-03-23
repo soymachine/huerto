@@ -268,6 +268,48 @@ body.winter {
   justify-content: center;
 }
 
+/* ── Grid insert row/col buttons ─────────────────────────────────────────── */
+.grid-insert-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.grid-insert-mid {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.grid-insert-btn {
+  background: none;
+  border: 1.5px dashed #b5c9a0;
+  border-radius: 6px;
+  color: #7aab54;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+  opacity: 0.5;
+  transition: opacity 0.15s, background 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.grid-insert-btn:hover {
+  opacity: 1;
+  background: #eaf5e0;
+}
+.grid-insert-btn--row {
+  width: 100%;
+  height: 22px;
+  min-width: 60px;
+}
+.grid-insert-btn--col {
+  width: 22px;
+  align-self: stretch;
+}
+@media print { .grid-insert-wrap { display: contents; } .grid-insert-btn { display: none; } }
+
 .grid {
   display: grid;
   gap: 8px;

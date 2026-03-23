@@ -245,6 +245,16 @@ export async function bulkUpsertPlantings(
   await supabase.from('plantings').upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
 }
 
+// ─── Grid shift (insert row/col at top/left) ──────────────────────────────────
+
+export async function shiftGardenRows(gardenId: string, delta: number): Promise<void> {
+  await supabase.rpc('shift_garden_rows', { p_garden_id: gardenId, p_delta: delta });
+}
+
+export async function shiftGardenCols(gardenId: string, delta: number): Promise<void> {
+  await supabase.rpc('shift_garden_cols', { p_garden_id: gardenId, p_delta: delta });
+}
+
 // ─── Reminders ────────────────────────────────────────────────────────────────
 
 export async function getReminder(userId: string): Promise<boolean> {

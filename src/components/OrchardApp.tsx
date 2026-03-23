@@ -45,7 +45,7 @@ function OrchardInner() {
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote, setDate, moveCell, copySeason,
+    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol,
   } = useGardenData();
 
   const [view,             setView]             = useState<View>('garden');
@@ -290,15 +290,26 @@ function OrchardInner() {
       {view === 'garden' && (
         <>
           <div className="grid-scroll">
-            <Grid
-              rows={rows}
-              cols={cols}
-              showAssociations={showAssociations}
-              getCell={getCell}
-              getCellWarnings={getCellWarnings}
-              onCellClick={setActiveCell}
-              onCellMove={moveCell}
-            />
+            <div className="grid-insert-wrap">
+              {/* Insert row top */}
+              <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('top')} title="Insertar fila arriba">＋</button>
+              {/* Middle row: insert col left | grid | insert col right */}
+              <div className="grid-insert-mid">
+                <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('left')} title="Insertar columna a la izquierda">＋</button>
+                <Grid
+                  rows={rows}
+                  cols={cols}
+                  showAssociations={showAssociations}
+                  getCell={getCell}
+                  getCellWarnings={getCellWarnings}
+                  onCellClick={setActiveCell}
+                  onCellMove={moveCell}
+                />
+                <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('right')} title="Insertar columna a la derecha">＋</button>
+              </div>
+              {/* Insert row bottom */}
+              <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('bottom')} title="Insertar fila abajo">＋</button>
+            </div>
           </div>
 
           <Legend planted={planted} />

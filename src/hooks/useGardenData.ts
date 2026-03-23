@@ -17,6 +17,7 @@ import {
   migrateLocalData, migrateLocalNotes,
   updateGardenSize, plantingsToGardenData, plantingsToDatesData,
   fetchNotes, upsertNote, dbNotesToNotesData,
+  shiftGardenRows, shiftGardenCols,
 } from '../lib/db';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -404,6 +405,68 @@ export function useGardenData() {
     else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
   };
 
+  // ── Insert row / col (shift existing data) ───────────────────────────────────
+  type NestedRecord = Record<string, Record<string, string>>;
+  const shiftCells = (data: NestedRecord, axis: 'row' | 'col'): NestedRecord => {
+    const out: NestedRecord = {};
+    for (const [sk, cells] of Object.entries(data)) {
+      out[sk] = {};
+      for (const [ck, val] of Object.entries(cells)) {
+        const [r, c] = ck.split(',').map(Number);
+        out[sk][axis === 'row' ? `${r + 1},${c}` : `${r},${c + 1}`] = val;
+      }
+    }
+    return out;
+  };
+
+  const insertRow = useCallback(async (at: 'top' | 'bottom') => {
+    const gid = activeIdRef.current;
+    const newRows = rows + 1;
+    if (at === 'top') {
+      const newGarden = shiftCells(gardenData as NestedRecord, 'row') as GardenData;
+      const newNotes  = shiftCells(notesData  as NestedRecord, 'row') as NotesData;
+      const newDates  = shiftCells(datesData  as NestedRecord, 'row') as DatesData;
+      setGardenData(newGarden);
+      setNotesData(newNotes);
+      setDatesData(newDates);
+      if (user && gid) {
+        await shiftGardenRows(gid, 1);
+      } else if (gid) {
+        saveGardenData(gid, newGarden);
+        saveGardenNotes(gid, newNotes);
+        saveGardenDates(gid, newDates);
+      }
+    }
+    setRows(newRows);
+    setGardens(prev => prev.map(g => g.id === gid ? { ...g, rows: newRows } : g));
+    if (user && gid) await updateGardenSize(gid, cols, newRows);
+    else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
+  }, [rows, cols, gardenData, notesData, datesData, user]);
+
+  const insertCol = useCallback(async (at: 'left' | 'right') => {
+    const gid = activeIdRef.current;
+    const newCols = cols + 1;
+    if (at === 'left') {
+      const newGarden = shiftCells(gardenData as NestedRecord, 'col') as GardenData;
+      const newNotes  = shiftCells(notesData  as NestedRecord, 'col') as NotesData;
+      const newDates  = shiftCells(datesData  as NestedRecord, 'col') as DatesData;
+      setGardenData(newGarden);
+      setNotesData(newNotes);
+      setDatesData(newDates);
+      if (user && gid) {
+        await shiftGardenCols(gid, 1);
+      } else if (gid) {
+        saveGardenData(gid, newGarden);
+        saveGardenNotes(gid, newNotes);
+        saveGardenDates(gid, newDates);
+      }
+    }
+    setCols(newCols);
+    setGardens(prev => prev.map(g => g.id === gid ? { ...g, cols: newCols } : g));
+    if (user && gid) await updateGardenSize(gid, newCols, rows);
+    else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g)); }
+  }, [rows, cols, gardenData, notesData, datesData, user]);
+
   return {
     // Garden management
     gardens, activeGardenId,
@@ -416,6 +479,6 @@ export function useGardenData() {
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote, setDate, moveCell, copySeason,
+    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol,
   };
 }
