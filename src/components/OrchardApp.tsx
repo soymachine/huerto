@@ -289,13 +289,12 @@ function OrchardInner() {
       {/* ── Garden view ── */}
       {view === 'garden' && (
         <>
-          <div className="grid-scroll">
-            <div className="grid-insert-wrap">
-              {/* Insert row top */}
-              <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('top')} title="Insertar fila arriba">＋</button>
-              {/* Middle row: insert col left | grid | insert col right */}
-              <div className="grid-insert-mid">
-                <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('left')} title="Insertar columna a la izquierda">＋</button>
+          <div className="grid-outer">
+            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('left')} title="Insertar columna a la izquierda">＋</button>
+            <div className="grid-scroll">
+              <div className="grid-insert-wrap">
+                {/* Insert row top */}
+                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('top')} title="Insertar fila arriba">＋</button>
                 <Grid
                   rows={rows}
                   cols={cols}
@@ -305,11 +304,11 @@ function OrchardInner() {
                   onCellClick={setActiveCell}
                   onCellMove={moveCell}
                 />
-                <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('right')} title="Insertar columna a la derecha">＋</button>
+                {/* Insert row bottom */}
+                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('bottom')} title="Insertar fila abajo">＋</button>
               </div>
-              {/* Insert row bottom */}
-              <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('bottom')} title="Insertar fila abajo">＋</button>
             </div>
+            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('right')} title="Insertar columna a la derecha">＋</button>
           </div>
 
           <Legend planted={planted} />

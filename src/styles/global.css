@@ -261,7 +261,14 @@ body.winter {
 .size-x { color: var(--muted); font-size: 0.85rem; }
 
 /* ─── GRID ─── */
+.grid-outer {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+}
 .grid-scroll {
+  flex: 1;
   overflow-x: auto;
   padding-bottom: 8px;
   display: flex;
