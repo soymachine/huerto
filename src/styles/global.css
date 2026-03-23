@@ -300,7 +300,7 @@ body.winter {
   background: #eaf5e0;
 }
 .grid-insert-btn--row {
-  width: 100%;
+  width: 94%;
   height: 22px;
   min-width: 60px;
 }
@@ -314,7 +314,6 @@ body.winter {
   display: grid;
   gap: 8px;
   width: fit-content;
-  padding-top: 5px;
 }
 
 .cell {
