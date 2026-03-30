@@ -247,12 +247,12 @@ export async function bulkUpsertPlantings(
 
 // ─── Grid shift (insert row/col at top/left) ──────────────────────────────────
 
-export async function shiftGardenRows(gardenId: string, delta: number): Promise<void> {
-  await supabase.rpc('shift_garden_rows', { p_garden_id: gardenId, p_delta: delta });
+export async function shiftGardenRows(gardenId: string, delta: number, fromIdx = 0): Promise<void> {
+  await supabase.rpc('shift_garden_rows', { p_garden_id: gardenId, p_delta: delta, p_from_idx: fromIdx });
 }
 
-export async function shiftGardenCols(gardenId: string, delta: number): Promise<void> {
-  await supabase.rpc('shift_garden_cols', { p_garden_id: gardenId, p_delta: delta });
+export async function shiftGardenCols(gardenId: string, delta: number, fromIdx = 0): Promise<void> {
+  await supabase.rpc('shift_garden_cols', { p_garden_id: gardenId, p_delta: delta, p_from_idx: fromIdx });
 }
 
 // ─── Reminders ────────────────────────────────────────────────────────────────

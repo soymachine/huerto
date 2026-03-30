@@ -318,10 +318,57 @@ body.winter {
 @media print { .grid-insert-wrap { display: contents; } .grid-insert-btn { display: none; } }
 
 .grid {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
   width: fit-content;
 }
+.grid-row {
+  display: flex;
+  flex-direction: row;
+}
+
+/* ── Inline insert strips ──────────────────────────────────────────────────── */
+.row-insert-strip {
+  width: 100%;
+  height: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: transparent;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: height 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+}
+.row-insert-strip:hover {
+  height: 20px;
+  background: rgba(122, 171, 84, 0.15);
+  color: #7aab54;
+}
+.col-insert-strip {
+  width: 8px;
+  align-self: stretch;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: transparent;
+  font-size: 0.65rem;
+  font-weight: 700;
+  border-radius: 4px;
+  transition: width 0.15s, background 0.15s, color 0.15s;
+  user-select: none;
+  writing-mode: vertical-rl;
+  overflow: hidden;
+}
+.col-insert-strip:hover {
+  width: 20px;
+  background: rgba(122, 171, 84, 0.15);
+  color: #7aab54;
+}
+@media print { .row-insert-strip, .col-insert-strip { display: none; } }
 
 .cell {
   width: var(--cell-size);

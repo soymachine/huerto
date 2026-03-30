@@ -407,30 +407,37 @@ export function useGardenData() {
 
   // ── Insert row / col (shift existing data) ───────────────────────────────────
   type NestedRecord = Record<string, Record<string, string>>;
-  const shiftCells = (data: NestedRecord, axis: 'row' | 'col'): NestedRecord => {
+  // Shift cells at axis-index >= fromIdx by +1
+  const shiftCells = (data: NestedRecord, axis: 'row' | 'col', fromIdx = 0): NestedRecord => {
     const out: NestedRecord = {};
     for (const [sk, cells] of Object.entries(data)) {
       out[sk] = {};
       for (const [ck, val] of Object.entries(cells)) {
         const [r, c] = ck.split(',').map(Number);
-        out[sk][axis === 'row' ? `${r + 1},${c}` : `${r},${c + 1}`] = val;
+        const idx = axis === 'row' ? r : c;
+        if (idx >= fromIdx) {
+          out[sk][axis === 'row' ? `${r + 1},${c}` : `${r},${c + 1}`] = val;
+        } else {
+          out[sk][ck] = val;
+        }
       }
     }
     return out;
   };
 
-  const insertRow = useCallback(async (at: 'top' | 'bottom') => {
+  // at = row index to insert BEFORE (0 = top, rows = bottom/append)
+  const insertRow = useCallback(async (at: number) => {
     const gid = activeIdRef.current;
     const newRows = rows + 1;
-    if (at === 'top') {
-      const newGarden = shiftCells(gardenData as NestedRecord, 'row') as GardenData;
-      const newNotes  = shiftCells(notesData  as NestedRecord, 'row') as NotesData;
-      const newDates  = shiftCells(datesData  as NestedRecord, 'row') as DatesData;
+    if (at < rows) {
+      const newGarden = shiftCells(gardenData as NestedRecord, 'row', at) as GardenData;
+      const newNotes  = shiftCells(notesData  as NestedRecord, 'row', at) as NotesData;
+      const newDates  = shiftCells(datesData  as NestedRecord, 'row', at) as DatesData;
       setGardenData(newGarden);
       setNotesData(newNotes);
       setDatesData(newDates);
       if (user && gid) {
-        await shiftGardenRows(gid, 1);
+        await shiftGardenRows(gid, 1, at);
       } else if (gid) {
         saveGardenData(gid, newGarden);
         saveGardenNotes(gid, newNotes);
@@ -443,18 +450,19 @@ export function useGardenData() {
     else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
   }, [rows, cols, gardenData, notesData, datesData, user]);
 
-  const insertCol = useCallback(async (at: 'left' | 'right') => {
+  // at = col index to insert BEFORE (0 = left, cols = right/append)
+  const insertCol = useCallback(async (at: number) => {
     const gid = activeIdRef.current;
     const newCols = cols + 1;
-    if (at === 'left') {
-      const newGarden = shiftCells(gardenData as NestedRecord, 'col') as GardenData;
-      const newNotes  = shiftCells(notesData  as NestedRecord, 'col') as NotesData;
-      const newDates  = shiftCells(datesData  as NestedRecord, 'col') as DatesData;
+    if (at < cols) {
+      const newGarden = shiftCells(gardenData as NestedRecord, 'col', at) as GardenData;
+      const newNotes  = shiftCells(notesData  as NestedRecord, 'col', at) as NotesData;
+      const newDates  = shiftCells(datesData  as NestedRecord, 'col', at) as DatesData;
       setGardenData(newGarden);
       setNotesData(newNotes);
       setDatesData(newDates);
       if (user && gid) {
-        await shiftGardenCols(gid, 1);
+        await shiftGardenCols(gid, 1, at);
       } else if (gid) {
         saveGardenData(gid, newGarden);
         saveGardenNotes(gid, newNotes);

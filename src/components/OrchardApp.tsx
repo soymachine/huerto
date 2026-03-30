@@ -290,11 +290,11 @@ function OrchardInner() {
       {view === 'garden' && (
         <>
           <div className="grid-outer">
-            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('left')} title="Insertar columna a la izquierda">＋</button>
+            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol(0)} title="Insertar columna a la izquierda">＋</button>
             <div className="grid-scroll">
               <div className="grid-insert-wrap">
                 {/* Insert row top */}
-                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('top')} title="Insertar fila arriba">＋</button>
+                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow(0)} title="Insertar fila arriba">＋</button>
                 <Grid
                   rows={rows}
                   cols={cols}
@@ -303,12 +303,14 @@ function OrchardInner() {
                   getCellWarnings={getCellWarnings}
                   onCellClick={setActiveCell}
                   onCellMove={moveCell}
+                  onInsertRow={(at) => insertRow(at)}
+                  onInsertCol={(at) => insertCol(at)}
                 />
                 {/* Insert row bottom */}
-                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow('bottom')} title="Insertar fila abajo">＋</button>
+                <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow(rows)} title="Insertar fila abajo">＋</button>
               </div>
             </div>
-            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol('right')} title="Insertar columna a la derecha">＋</button>
+            <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol(cols)} title="Insertar columna a la derecha">＋</button>
           </div>
 
           <Legend planted={planted} />
