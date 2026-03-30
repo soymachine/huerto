@@ -347,8 +347,8 @@ body.winter {
   height: 20px;
   background: rgba(122, 171, 84, 0.15);
   color: #7aab54;
-  /* 1.2s delay before expanding on hover */
-  transition: height 0.2s 1.2s, background 0.2s 1.2s, color 0.2s 1.2s;
+  /* 0.8s delay before expanding on hover */
+  transition: height 0.2s 0.8s, background 0.2s 0.8s, color 0.2s 0.8s;
 }
 .col-insert-strip {
   width: 8px;
@@ -371,8 +371,8 @@ body.winter {
   width: 20px;
   background: rgba(122, 171, 84, 0.15);
   color: #7aab54;
-  /* 1.2s delay before expanding on hover */
-  transition: width 0.2s 1.2s, background 0.2s 1.2s, color 0.2s 1.2s;
+  /* 0.8s delay before expanding on hover */
+  transition: width 0.2s 0.8s, background 0.2s 0.8s, color 0.2s 0.8s;
 }
 @media print { .row-insert-strip, .col-insert-strip { display: none; } }
 
@@ -1114,7 +1114,7 @@ body.winter {
   height: 7px;
   border-radius: 50%;
   background: var(--green-mid);
-  animation: pulse 1.2s ease-in-out infinite;
+  animation: pulse 0.8s ease-in-out infinite;
 }
 @keyframes pulse {
   0%, 100% { opacity: 1; transform: scale(1);    }
