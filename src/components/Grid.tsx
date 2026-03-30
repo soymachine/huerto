@@ -1,4 +1,4 @@
-import { useState, useCallback, Fragment } from 'react';
+import { useState, useCallback, useRef, Fragment } from 'react';
 import { createPortal } from 'react-dom';
 import { findPlant } from '../data/plants';
 import { useLang } from '../context/LangContext';
@@ -82,6 +82,20 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
 
   const showTip = useCallback((t: TooltipState) => setTooltip(t), []);
   const hideTip = useCallback(() => setTooltip(null), []);
+
+  // ── Col-insert hover: sync all strips in the same column ──────────────────
+  const [hoverInsertCol, setHoverInsertCol] = useState<number | null>(null);
+  const colInsertTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const onColStripEnter = useCallback((c: number) => {
+    if (colInsertTimer.current) clearTimeout(colInsertTimer.current);
+    colInsertTimer.current = setTimeout(() => setHoverInsertCol(c), 800);
+  }, []);
+
+  const onColStripLeave = useCallback(() => {
+    if (colInsertTimer.current) clearTimeout(colInsertTimer.current);
+    setHoverInsertCol(null);
+  }, []);
 
   return (
     <>
@@ -169,9 +183,11 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
                     {/* ── Col insert strip ── */}
                     {c < cols - 1 && onInsertCol && (
                       <div
-                        className="col-insert-strip"
+                        className={`col-insert-strip${hoverInsertCol === c ? ' col-insert-strip--active' : ''}`}
+                        onMouseEnter={() => onColStripEnter(c)}
+                        onMouseLeave={onColStripLeave}
                         onClick={() => onInsertCol(c + 1)}
-                        title={`Insertar columna aquí`}
+                        title="Insertar columna aquí"
                       >＋</div>
                     )}
                   </Fragment>

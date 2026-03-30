@@ -361,18 +361,15 @@ body.winter {
   font-size: 0.65rem;
   font-weight: 700;
   border-radius: 4px;
-  /* revert immediately on mouse-leave */
-  transition: width 0.15s 0s, background 0.15s 0s, color 0.15s 0s;
+  transition: width 0.2s, background 0.2s, color 0.2s;
   user-select: none;
   writing-mode: vertical-rl;
   overflow: hidden;
 }
-.col-insert-strip:hover {
+.col-insert-strip--active {
   width: 20px;
   background: rgba(122, 171, 84, 0.15);
   color: #7aab54;
-  /* 0.8s delay before expanding on hover */
-  transition: width 0.2s 0.8s, background 0.2s 0.8s, color 0.2s 0.8s;
 }
 @media print { .row-insert-strip, .col-insert-strip { display: none; } }
 
