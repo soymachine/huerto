@@ -1122,6 +1122,54 @@ body.winter {
   .plant-opt-emoji { font-size: 1.5rem; }
 }
 
+/* ─── DELETE CONFIRM MODAL ─── */
+.delete-confirm-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.35);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1000;
+}
+.delete-confirm-modal {
+  background: var(--bg);
+  border-radius: 12px;
+  padding: 24px 28px;
+  max-width: 360px;
+  width: 90vw;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+}
+.delete-confirm-msg {
+  font-size: 0.95rem;
+  color: var(--text);
+  line-height: 1.5;
+  margin: 0 0 20px;
+}
+.delete-confirm-actions {
+  display: flex; gap: 10px; justify-content: flex-end;
+}
+.delete-confirm-cancel {
+  padding: 8px 18px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.delete-confirm-cancel:hover { background: var(--bg-dark); }
+.delete-confirm-ok {
+  padding: 8px 18px;
+  border: none;
+  border-radius: 8px;
+  background: #c0392b;
+  color: #fff;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.delete-confirm-ok:hover { background: #a93226; }
+
 /* ─── VERSION FOOTER ─── */
 .app-version {
   text-align: center;

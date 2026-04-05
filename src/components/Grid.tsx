@@ -86,6 +86,9 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
   const hideTip = useCallback(() => setTooltip(null), []);
 
   // ── Col-insert hover: sync all strips in the same column ──────────────────
+  // ── Delete confirmation ────────────────────────────────────────────────────
+  const [deleteConfirm, setDeleteConfirm] = useState<{ axis: 'row' | 'col'; idx: number } | null>(null);
+
   const [hoverInsertCol, setHoverInsertCol] = useState<number | null>(null);
   const colInsertTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -110,7 +113,7 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
               <Fragment key={c}>
                 <button
                   className="delete-col-btn"
-                  onClick={() => onDeleteCol(c)}
+                  onClick={() => setDeleteConfirm({ axis: 'col', idx: c })}
                   title="Eliminar columna"
                 >×</button>
                 {c < cols - 1 && <div className="delete-col-strip-spacer" />}
@@ -126,7 +129,7 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
               {onDeleteRow && (
                 <button
                   className="delete-row-btn"
-                  onClick={() => onDeleteRow(r)}
+                  onClick={() => setDeleteConfirm({ axis: 'row', idx: r })}
                   title="Eliminar fila"
                 >×</button>
               )}
@@ -233,6 +236,28 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
           </Fragment>
         ))}
       </div>
+      {deleteConfirm && createPortal(
+        <div className="delete-confirm-overlay" onClick={() => setDeleteConfirm(null)}>
+          <div className="delete-confirm-modal" onClick={e => e.stopPropagation()}>
+            <p className="delete-confirm-msg">
+              {deleteConfirm.axis === 'row' ? t.deleteRowConfirm : t.deleteColConfirm}
+            </p>
+            <div className="delete-confirm-actions">
+              <button className="delete-confirm-cancel" onClick={() => setDeleteConfirm(null)}>
+                {t.cancel}
+              </button>
+              <button className="delete-confirm-ok" onClick={() => {
+                if (deleteConfirm.axis === 'row') onDeleteRow?.(deleteConfirm.idx);
+                else onDeleteCol?.(deleteConfirm.idx);
+                setDeleteConfirm(null);
+              }}>
+                {t.confirmDelete}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
       <TooltipPortal tip={tooltip} />
     </>
   );

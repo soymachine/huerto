@@ -111,6 +111,10 @@ export interface Translations {
   assocTableTitle:    string;
   assocGood:          string;
   assocBad:           string;
+  deleteRowConfirm:   string;
+  deleteColConfirm:   string;
+  confirmDelete:      string;
+  cancel:             string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -213,6 +217,10 @@ const ES: Translations = {
   assocTableTitle:    'Tabla de asociaciones',
   assocGood:          'Buena asociación',
   assocBad:           'Incompatible',
+  deleteRowConfirm:   '¿Eliminar esta fila? Se perderán todas las plantas y notas que contiene.',
+  deleteColConfirm:   '¿Eliminar esta columna? Se perderán todas las plantas y notas que contiene.',
+  confirmDelete:      'Eliminar',
+  cancel:             'Cancelar',
 };
 
 const EN: Translations = {
@@ -313,6 +321,10 @@ const EN: Translations = {
   assocTableTitle:    'Associations table',
   assocGood:          'Good companion',
   assocBad:           'Incompatible',
+  deleteRowConfirm:   'Delete this row? All plants and notes in it will be lost.',
+  deleteColConfirm:   'Delete this column? All plants and notes in it will be lost.',
+  confirmDelete:      'Delete',
+  cancel:             'Cancel',
 };
 
 export const TRANSLATIONS: Record<Lang, Translations> = { es: ES, en: EN };
