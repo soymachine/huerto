@@ -371,7 +371,65 @@ body.winter {
   background: rgba(122, 171, 84, 0.15);
   color: #7aab54;
 }
-@media print { .row-insert-strip, .col-insert-strip { display: none; } }
+/* ── Delete row / col buttons ─────────────────────────────────────────────── */
+.delete-row-btn {
+  width: 22px;
+  flex-shrink: 0;
+  align-self: stretch;
+  background: none;
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-right: 4px;
+  user-select: none;
+  transition: color 0.15s 0s, background 0.15s 0s, border-color 0.15s 0s;
+}
+.delete-row-btn:hover {
+  color: #c0392b;
+  background: rgba(192, 57, 43, 0.08);
+  border-color: rgba(192, 57, 43, 0.3);
+  transition: color 0.15s 0.8s, background 0.15s 0.8s, border-color 0.15s 0.8s;
+}
+.col-delete-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 22px;
+  margin-bottom: 4px;
+}
+.col-delete-row-spacer {
+  width: 26px; /* 22px btn + 4px margin-right */
+  flex-shrink: 0;
+}
+.delete-col-btn {
+  width: var(--cell-size);
+  height: 22px;
+  flex-shrink: 0;
+  background: none;
+  border: 1.5px dashed transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  color: transparent;
+  font-size: 0.8rem;
+  font-weight: 700;
+  user-select: none;
+  transition: color 0.15s 0s, background 0.15s 0s, border-color 0.15s 0s;
+}
+.delete-col-btn:hover {
+  color: #c0392b;
+  background: rgba(192, 57, 43, 0.08);
+  border-color: rgba(192, 57, 43, 0.3);
+  transition: color 0.15s 0.8s, background 0.15s 0.8s, border-color 0.15s 0.8s;
+}
+.delete-col-strip-spacer {
+  width: 8px;
+  flex-shrink: 0;
+}
+
+@media print { .row-insert-strip, .col-insert-strip, .delete-row-btn, .col-delete-header { display: none; } }
 
 .cell {
   width: var(--cell-size);
@@ -1062,6 +1120,16 @@ body.winter {
   .plant-grid   { grid-template-columns: repeat(3, 1fr); }
   .plant-opt    { padding: 10px 6px 8px; }
   .plant-opt-emoji { font-size: 1.5rem; }
+}
+
+/* ─── VERSION FOOTER ─── */
+.app-version {
+  text-align: center;
+  font-size: 0.65rem;
+  color: var(--muted);
+  opacity: 0.5;
+  padding: 24px 0 12px;
+  letter-spacing: 0.08em;
 }
 
 /* ─── LEGEND ─── */

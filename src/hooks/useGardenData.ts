@@ -18,6 +18,7 @@ import {
   updateGardenSize, plantingsToGardenData, plantingsToDatesData,
   fetchNotes, upsertNote, dbNotesToNotesData,
   shiftGardenRows, shiftGardenCols,
+  deleteGardenRowData, deleteGardenColData,
 } from '../lib/db';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -450,6 +451,46 @@ export function useGardenData() {
     else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
   }, [rows, cols, gardenData, notesData, datesData, user]);
 
+  // Remove a specific axis-index and shift remaining indices down by 1
+  const filterAndShiftCells = (data: NestedRecord, axis: 'row' | 'col', idx: number): NestedRecord => {
+    const out: NestedRecord = {};
+    for (const [sk, cells] of Object.entries(data)) {
+      out[sk] = {};
+      for (const [ck, val] of Object.entries(cells)) {
+        const [r, c] = ck.split(',').map(Number);
+        const cur = axis === 'row' ? r : c;
+        if (cur === idx) continue;
+        const next = cur > idx ? cur - 1 : cur;
+        out[sk][axis === 'row' ? `${next},${c}` : `${r},${next}`] = val;
+      }
+    }
+    return out;
+  };
+
+  const deleteRow = useCallback(async (r: number) => {
+    if (rows <= 1) return;
+    const gid = activeIdRef.current;
+    const newRows = rows - 1;
+    const newGarden = filterAndShiftCells(gardenData as NestedRecord, 'row', r) as GardenData;
+    const newNotes  = filterAndShiftCells(notesData  as NestedRecord, 'row', r) as NotesData;
+    const newDates  = filterAndShiftCells(datesData  as NestedRecord, 'row', r) as DatesData;
+    setGardenData(newGarden);
+    setNotesData(newNotes);
+    setDatesData(newDates);
+    setRows(newRows);
+    setGardens(prev => prev.map(g => g.id === gid ? { ...g, rows: newRows } : g));
+    if (user && gid) {
+      await deleteGardenRowData(gid, r);
+      if (r < newRows) await shiftGardenRows(gid, -1, r + 1);
+      await updateGardenSize(gid, cols, newRows);
+    } else if (gid) {
+      saveGardenData(gid, newGarden);
+      saveGardenNotes(gid, newNotes);
+      saveGardenDates(gid, newDates);
+      const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g));
+    }
+  }, [rows, cols, gardenData, notesData, datesData, user]);
+
   // at = col index to insert BEFORE (0 = left, cols = right/append)
   const insertCol = useCallback(async (at: number) => {
     const gid = activeIdRef.current;
@@ -475,6 +516,30 @@ export function useGardenData() {
     else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g)); }
   }, [rows, cols, gardenData, notesData, datesData, user]);
 
+  const deleteCol = useCallback(async (c: number) => {
+    if (cols <= 1) return;
+    const gid = activeIdRef.current;
+    const newCols = cols - 1;
+    const newGarden = filterAndShiftCells(gardenData as NestedRecord, 'col', c) as GardenData;
+    const newNotes  = filterAndShiftCells(notesData  as NestedRecord, 'col', c) as NotesData;
+    const newDates  = filterAndShiftCells(datesData  as NestedRecord, 'col', c) as DatesData;
+    setGardenData(newGarden);
+    setNotesData(newNotes);
+    setDatesData(newDates);
+    setCols(newCols);
+    setGardens(prev => prev.map(g => g.id === gid ? { ...g, cols: newCols } : g));
+    if (user && gid) {
+      await deleteGardenColData(gid, c);
+      if (c < newCols) await shiftGardenCols(gid, -1, c + 1);
+      await updateGardenSize(gid, newCols, rows);
+    } else if (gid) {
+      saveGardenData(gid, newGarden);
+      saveGardenNotes(gid, newNotes);
+      saveGardenDates(gid, newDates);
+      const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g));
+    }
+  }, [rows, cols, gardenData, notesData, datesData, user]);
+
   return {
     // Garden management
     gardens, activeGardenId,
@@ -487,6 +552,6 @@ export function useGardenData() {
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol,
+    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
   };
 }

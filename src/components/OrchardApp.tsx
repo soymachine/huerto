@@ -45,7 +45,7 @@ function OrchardInner() {
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol,
+    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
   } = useGardenData();
 
   const [view,             setView]             = useState<View>('garden');
@@ -305,6 +305,8 @@ function OrchardInner() {
                   onCellMove={moveCell}
                   onInsertRow={(at) => insertRow(at)}
                   onInsertCol={(at) => insertCol(at)}
+                  onDeleteRow={deleteRow}
+                  onDeleteCol={deleteCol}
                 />
                 {/* Insert row bottom */}
                 <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow(rows)} title="Insertar fila abajo">＋</button>
@@ -358,6 +360,8 @@ function OrchardInner() {
       {showAssocTable && (
         <AssociationsTable onClose={() => setShowAssocTable(false)} />
       )}
+
+      <footer className="app-version">v1.0</footer>
 
     </div>
   );

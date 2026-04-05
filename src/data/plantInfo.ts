@@ -506,4 +506,126 @@ export const PLANT_INFO: Record<string, PlantInfo> = {
     avoid: [],
     tip: 'Necesita mucho espacio y calor. Golpea la sandía: si suena hueco, está madura. Deja solo 2–3 frutos por planta para mayor tamaño.',
   },
+
+  // ── Tagete ────────────────────────────────────────────────────────────────
+  tagetes: {
+    sowMonths: [2, 3, 4],
+    transplantMonths: [4, 5],
+    harvestMonths: [6, 7, 8, 9, 10],
+    spacing: '20–30 cm',
+    depth: '0,5 cm',
+    duration: 'Anual',
+    difficulty: 1,
+    companions: ['tomato', 'pepper', 'eggplant', 'bean', 'cucumber', 'potato', 'lettuce', 'cabbage', 'broccoli'],
+    avoid: [],
+    tip: 'Sus raíces repelen nemátodos del suelo y su olor disuade mosca blanca, pulgón y trips. Planta en los bordes del huerto.',
+  },
+
+  // ── Capuchina ─────────────────────────────────────────────────────────────
+  nasturtium: {
+    sowMonths: [3, 4, 5],
+    harvestMonths: [6, 7, 8, 9, 10],
+    spacing: '25–30 cm',
+    depth: '1 cm',
+    duration: 'Anual',
+    difficulty: 1,
+    companions: ['tomato', 'cucumber', 'zucchini', 'pumpkin', 'radish', 'bean', 'cabbage', 'broccoli', 'cauliflower'],
+    avoid: [],
+    tip: 'Planta trampa para pulgones: los atrae alejándolos de tus cultivos. Flores y hojas son comestibles con sabor picante.',
+  },
+
+  // ── Caléndula ─────────────────────────────────────────────────────────────
+  calendula: {
+    sowMonths: [2, 3, 4, 9, 10],
+    harvestMonths: [4, 5, 6, 7, 8, 9, 10],
+    spacing: '25–30 cm',
+    depth: '0,5 cm',
+    duration: 'Anual',
+    difficulty: 1,
+    companions: ['tomato', 'pepper', 'eggplant', 'carrot', 'cabbage', 'broccoli', 'cauliflower', 'asparagus'],
+    avoid: [],
+    tip: 'Repele mosca blanca y ácaros. Sus flores tienen propiedades medicinales. Muy fácil de cultivar, resiembra sola.',
+  },
+
+  // ── Cosmos ────────────────────────────────────────────────────────────────
+  cosmos: {
+    sowMonths: [3, 4, 5],
+    harvestMonths: [7, 8, 9, 10],
+    spacing: '30–45 cm',
+    depth: '0,5 cm',
+    duration: 'Anual',
+    difficulty: 1,
+    companions: ['tomato', 'corn', 'bean', 'cucumber', 'pumpkin'],
+    avoid: [],
+    tip: 'Atrae polinizadores y depredadores naturales de plagas. Su floración prolongada beneficia todo el huerto.',
+  },
+
+  // ── Salvia ────────────────────────────────────────────────────────────────
+  sage: {
+    sowMonths: [2, 3, 4],
+    transplantMonths: [4, 5],
+    harvestMonths: [5, 6, 7, 8, 9],
+    spacing: '40–50 cm',
+    depth: '0,5 cm',
+    duration: 'Perenne',
+    difficulty: 1,
+    companions: ['cabbage', 'broccoli', 'cauliflower', 'carrot', 'bean', 'strawberry', 'tomato'],
+    avoid: ['fennel', 'onion', 'cucumber'],
+    tip: 'Su aroma repele la mosca de la col y la mariposa blanca. No plantes cerca de pepino ni cebolla, les inhibe el crecimiento.',
+  },
+
+  // ── Romero ────────────────────────────────────────────────────────────────
+  rosemary: {
+    sowMonths: [2, 3, 4],
+    transplantMonths: [4, 5],
+    harvestMonths: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+    spacing: '50–60 cm',
+    depth: '0,5 cm',
+    duration: 'Perenne',
+    difficulty: 1,
+    companions: ['cabbage', 'broccoli', 'cauliflower', 'bean', 'carrot', 'sage'],
+    avoid: ['pumpkin', 'cucumber'],
+    tip: 'Repele mosca de la zanahoria y caracoles. Tolera sequía. Muy útil plantado en los bordes del huerto como barrera aromática.',
+  },
+
+  // ── Lavanda ───────────────────────────────────────────────────────────────
+  lavender: {
+    sowMonths: [2, 3],
+    transplantMonths: [4, 5],
+    harvestMonths: [6, 7, 8],
+    spacing: '40–60 cm',
+    depth: '0,5 cm',
+    duration: 'Perenne',
+    difficulty: 1,
+    companions: ['cabbage', 'broccoli', 'lettuce', 'tomato', 'carrot'],
+    avoid: [],
+    tip: 'Atrae polinizadores y repele pulgones, polillas y mosca blanca. Necesita suelo bien drenado y mucho sol.',
+  },
+
+  // ── Escarola ──────────────────────────────────────────────────────────────
+  escarole: {
+    sowMonths: [7, 8, 9],
+    transplantMonths: [8, 9, 10],
+    harvestMonths: [10, 11, 12, 1],
+    spacing: '25–30 cm',
+    depth: '0,5 cm',
+    duration: '60–80 días',
+    difficulty: 1,
+    companions: ['radish', 'carrot', 'onion', 'garlic', 'beet', 'strawberry'],
+    avoid: ['celery', 'fennel'],
+    tip: 'Para blanquear las hojas y reducir el amargor, ata las hojas exteriores sobre el cogollo 10 días antes de cosechar.',
+  },
+
+  // ── Canónigos ─────────────────────────────────────────────────────────────
+  lamblettuce: {
+    sowMonths: [8, 9, 10],
+    harvestMonths: [10, 11, 12, 1, 2, 3],
+    spacing: '10–15 cm',
+    depth: '0,5 cm',
+    duration: '45–60 días',
+    difficulty: 1,
+    companions: ['radish', 'carrot', 'beet', 'onion', 'garlic'],
+    avoid: [],
+    tip: 'Cultivo de otoño-invierno muy resistente al frío. Siembra directa en hileras. Cosecha cortando las hojas a ras del suelo.',
+  },
 };

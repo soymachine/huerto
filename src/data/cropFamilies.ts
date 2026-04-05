@@ -37,6 +37,11 @@ export const CROP_FAMILY: Record<string, string> = {
   // Compuestas / Asteraceae
   lettuce:     'asteraceae',
   artichoke:   'asteraceae',
+  escarole:    'asteraceae',
+  lamblettuce: 'asteraceae',
+  tagetes:     'asteraceae',
+  calendula:   'asteraceae',
+  cosmos:      'asteraceae',
   // Gramíneas
   corn:        'grass',
   // Quenopodiáceas / Amaranthaceae
@@ -49,6 +54,11 @@ export const CROP_FAMILY: Record<string, string> = {
   borage:      'boraginaceae',
   // Labiadas / Lamiaceae
   basil:       'lamiaceae',
+  rosemary:    'lamiaceae',
+  sage:        'lamiaceae',
+  lavender:    'lamiaceae',
+  // Tropaeolaceae
+  nasturtium:  'tropaeolaceae',
 };
 
 // ─── Family display colours (used for the rotation overlay on the grid) ───────
@@ -64,8 +74,9 @@ export const FAMILY_COLOR: Record<string, string> = {
   grass:        '#E5F5E5',
   chenopod:     '#D5F5EC',
   rosaceae:     '#FAE0E8',
-  boraginaceae: '#D8E8FF',
-  lamiaceae:    '#F5E8FF',
+  boraginaceae:   '#D8E8FF',
+  lamiaceae:      '#F5E8FF',
+  tropaeolaceae:  '#FFF0D0',
 };
 
 export const FAMILY_ABBR: Record<string, string> = {
@@ -79,8 +90,9 @@ export const FAMILY_ABBR: Record<string, string> = {
   grass:        'GRA',
   chenopod:     'CHE',
   rosaceae:     'ROS',
-  boraginaceae: 'BOR',
-  lamiaceae:    'LAM',
+  boraginaceae:   'BOR',
+  lamiaceae:      'LAM',
+  tropaeolaceae:  'TRO',
 };
 
 export const FAMILY_LABEL: Record<string, string> = {
@@ -94,8 +106,9 @@ export const FAMILY_LABEL: Record<string, string> = {
   grass:        'Gramínea',
   chenopod:     'Quenopodiácea',
   rosaceae:     'Rosácea',
-  boraginaceae: 'Boraginacea',
-  lamiaceae:    'Labiada',
+  boraginaceae:   'Boraginacea',
+  lamiaceae:      'Labiada',
+  tropaeolaceae:  'Tropeolácea',
 };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

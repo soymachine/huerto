@@ -245,6 +245,18 @@ export async function bulkUpsertPlantings(
   await supabase.from('plantings').upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
 }
 
+// ─── Grid delete row/col data ─────────────────────────────────────────────────
+
+export async function deleteGardenRowData(gardenId: string, rowIdx: number): Promise<void> {
+  await supabase.from('plantings').delete().eq('garden_id', gardenId).eq('row_idx', rowIdx);
+  await supabase.from('notes').delete().eq('garden_id', gardenId).eq('row_idx', rowIdx);
+}
+
+export async function deleteGardenColData(gardenId: string, colIdx: number): Promise<void> {
+  await supabase.from('plantings').delete().eq('garden_id', gardenId).eq('col_idx', colIdx);
+  await supabase.from('notes').delete().eq('garden_id', gardenId).eq('col_idx', colIdx);
+}
+
 // ─── Grid shift (insert row/col at top/left) ──────────────────────────────────
 
 export async function shiftGardenRows(gardenId: string, delta: number, fromIdx = 0): Promise<void> {

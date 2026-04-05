@@ -24,6 +24,8 @@ interface Props {
   onCellMove?:      (from: { r: number; c: number }, to: { r: number; c: number }) => void;
   onInsertRow?:     (atRow: number) => void;
   onInsertCol?:     (atCol: number) => void;
+  onDeleteRow?:     (r: number) => void;
+  onDeleteCol?:     (c: number) => void;
 }
 
 interface TooltipState { text: string; x: number; y: number; }
@@ -74,7 +76,7 @@ function TooltipPortal({ tip }: { tip: TooltipState | null }) {
   );
 }
 
-export default function Grid({ rows, cols, showAssociations, getCell, getCellWarnings, onCellClick, onCellMove, onInsertRow, onInsertCol }: Props) {
+export default function Grid({ rows, cols, showAssociations, getCell, getCellWarnings, onCellClick, onCellMove, onInsertRow, onInsertCol, onDeleteRow, onDeleteCol }: Props) {
   const { lang, t } = useLang();
   const [tooltip,  setTooltip]  = useState<TooltipState | null>(null);
   const [dragSrc,  setDragSrc]  = useState<{ r: number; c: number } | null>(null);
@@ -100,9 +102,34 @@ export default function Grid({ rows, cols, showAssociations, getCell, getCellWar
   return (
     <>
       <div className="grid">
+        {/* ── Col delete header ── */}
+        {onDeleteCol && (
+          <div className="col-delete-header">
+            {onDeleteRow && <div className="col-delete-row-spacer" />}
+            {Array.from({ length: cols }, (_, c) => (
+              <Fragment key={c}>
+                <button
+                  className="delete-col-btn"
+                  onClick={() => onDeleteCol(c)}
+                  title="Eliminar columna"
+                >×</button>
+                {c < cols - 1 && <div className="delete-col-strip-spacer" />}
+              </Fragment>
+            ))}
+          </div>
+        )}
+
         {Array.from({ length: rows }, (_, r) => (
           <Fragment key={`row-${r}`}>
             <div className="grid-row">
+              {/* ── Delete row button ── */}
+              {onDeleteRow && (
+                <button
+                  className="delete-row-btn"
+                  onClick={() => onDeleteRow(r)}
+                  title="Eliminar fila"
+                >×</button>
+              )}
               {Array.from({ length: cols }, (_, c) => {
                 const plantId  = getCell(r, c);
                 const plant    = plantId ? findPlant(plantId) : null;
