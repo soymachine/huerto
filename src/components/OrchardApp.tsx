@@ -375,7 +375,7 @@ function OrchardInner() {
         <AssociationsTable onClose={() => setShowAssocTable(false)} />
       )}
 
-      <footer className="app-version">v1.0</footer>
+      <footer className="app-version">v1.4</footer>
 
     </div>
   );
