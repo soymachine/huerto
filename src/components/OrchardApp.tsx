@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+import { ArrowCounterClockwise, ArrowClockwise } from '@phosphor-icons/react';
 import type { Lang } from '../context/LangContext';
 import { AuthProvider }   from '../context/AuthContext';
 import { LangProvider, useLang } from '../context/LangContext';
@@ -280,8 +281,8 @@ function OrchardInner() {
 
           </div>
           <div className="header-tabs-right">
-            <button className="print-btn" onClick={undo} disabled={!canUndo} title={t.undo}>↶</button>
-            <button className="print-btn" onClick={redo} disabled={!canRedo} title={t.redo}>↷</button>
+            <button className="print-btn" onClick={undo} disabled={!canUndo} title={t.undo}><ArrowCounterClockwise size={16} weight="bold" /></button>
+            <button className="print-btn" onClick={redo} disabled={!canRedo} title={t.redo}><ArrowClockwise size={16} weight="bold" /></button>
             <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
             <ConfigButton
               cols={cols} rows={rows}
