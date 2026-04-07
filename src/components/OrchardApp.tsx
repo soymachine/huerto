@@ -46,6 +46,7 @@ function OrchardInner() {
     rows,   setRows,
     ready,  syncing,
     setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
+    undo, redo, canUndo, canRedo,
   } = useGardenData();
 
   const [view,             setView]             = useState<View>('garden');
@@ -79,6 +80,17 @@ function OrchardInner() {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, []);
+
+  // ── Undo / redo keyboard shortcuts ────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (e.key === 'y' || (e.key === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [undo, redo]);
 
   // ── Core helpers ──────────────────────────────────────────────────────────
   const seasonKey    = `${year}-${season}`;
@@ -268,6 +280,8 @@ function OrchardInner() {
 
           </div>
           <div className="header-tabs-right">
+            <button className="print-btn" onClick={undo} disabled={!canUndo} title={t.undo}>↶</button>
+            <button className="print-btn" onClick={redo} disabled={!canRedo} title={t.redo}>↷</button>
             <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
             <ConfigButton
               cols={cols} rows={rows}
