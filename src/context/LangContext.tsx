@@ -115,6 +115,9 @@ export interface Translations {
   deleteColConfirm:   string;
   confirmDelete:      string;
   cancel:             string;
+  // Undo / redo
+  undo:               string;
+  redo:               string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -221,6 +224,8 @@ const ES: Translations = {
   deleteColConfirm:   '¿Eliminar esta columna? Se perderán todas las plantas y notas que contiene.',
   confirmDelete:      'Eliminar',
   cancel:             'Cancelar',
+  undo:               'Deshacer (Ctrl+Z)',
+  redo:               'Rehacer (Ctrl+Y)',
 };
 
 const EN: Translations = {
@@ -325,6 +330,8 @@ const EN: Translations = {
   deleteColConfirm:   'Delete this column? All plants and notes in it will be lost.',
   confirmDelete:      'Delete',
   cancel:             'Cancel',
+  undo:               'Undo (Ctrl+Z)',
+  redo:               'Redo (Ctrl+Y)',
 };
 
 export const TRANSLATIONS: Record<Lang, Translations> = { es: ES, en: EN };

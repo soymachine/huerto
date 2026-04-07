@@ -896,6 +896,7 @@ body.winter {
   flex-shrink: 0;
 }
 .print-btn:hover { background: var(--bg-mid); border-color: var(--green); color: var(--green); }
+.print-btn:disabled { opacity: 0.35; cursor: default; pointer-events: none; }
 
 /* ── Config button + panel ── */
 .cfg-wrap {

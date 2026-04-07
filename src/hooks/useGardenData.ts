@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import type { GardenData, NotesData, DatesData, Season, LocalGarden } from '../lib/storage';
 import {
@@ -51,6 +51,23 @@ export function useGardenData() {
   const [ready,     setReady]     = useState(false);
   const [syncing,   setSyncing]   = useState(false);
   const [switching, setSwitching] = useState(false);
+
+  // ── Undo / redo history ──────────────────────────────────────────────────────
+  interface HistoryEntry { gardenData: GardenData; notesData: NotesData; datesData: DatesData; }
+  const MAX_HISTORY = 50;
+  const [past,   setPast]   = useState<HistoryEntry[]>([]);
+  const [future, setFuture] = useState<HistoryEntry[]>([]);
+
+  const canUndo = useMemo(() => past.length > 0,   [past]);
+  const canRedo = useMemo(() => future.length > 0, [future]);
+
+  const clearHistory = useCallback(() => { setPast([]); setFuture([]); }, []);
+
+  // Capture a snapshot before a mutation (also clears redo)
+  const pushHistory = useCallback((entry: HistoryEntry) => {
+    setPast(prev => [...prev.slice(-(MAX_HISTORY - 1)), entry]);
+    setFuture([]);
+  }, []);
 
   const activeIdRef = useRef<string | null>(null);
   activeIdRef.current = activeGardenId;
@@ -188,6 +205,7 @@ export function useGardenData() {
   const switchGarden = useCallback(async (id: string) => {
     if (id === activeIdRef.current) return;
     setSwitching(true);
+    clearHistory();
     const garden = gardens.find(g => g.id === id);
     if (!garden) { setSwitching(false); return; }
 
@@ -229,8 +247,9 @@ export function useGardenData() {
       setGardenData({});
       setNotesData({});
       setDatesData({});
+      clearHistory();
     }
-  }, [user, gardens, switchGarden]);
+  }, [user, gardens, switchGarden, clearHistory]);
 
   // ── Rename garden ─────────────────────────────────────────────────────────────
   const renameGarden = useCallback(async (id: string, name: string) => {
@@ -265,8 +284,61 @@ export function useGardenData() {
     if (id === activeIdRef.current) await switchGarden(next[0].id);
   }, [gardens, user, switchGarden]);
 
+  // ── Sync a diff of two gardenData states to the DB ───────────────────────────
+  const syncDiff = useCallback(async (
+    prevGarden: GardenData, nextGarden: GardenData,
+    nextDates:  DatesData,
+  ) => {
+    const gid = activeIdRef.current;
+    if (!user || !gid) return;
+    const allSeasonKeys = new Set([...Object.keys(prevGarden), ...Object.keys(nextGarden)]);
+    for (const sk of allSeasonKeys) {
+      const [yrStr, sn] = sk.split('-');
+      const yr = parseInt(yrStr, 10);
+      const prevCells = prevGarden[sk] ?? {};
+      const nextCells = nextGarden[sk] ?? {};
+      const allCells = new Set([...Object.keys(prevCells), ...Object.keys(nextCells)]);
+      for (const ck of allCells) {
+        if (prevCells[ck] === nextCells[ck]) continue;
+        const [r, c] = ck.split(',').map(Number);
+        if (!nextCells[ck]) {
+          await removePlanting(gid, yr, sn as Season, r, c);
+        } else {
+          const date = nextDates[sk]?.[ck] ?? '';
+          await upsertPlanting(gid, yr, sn as Season, r, c, nextCells[ck], date);
+        }
+      }
+    }
+  }, [user]);
+
+  // ── Undo / redo ──────────────────────────────────────────────────────────────
+  const undo = useCallback(async () => {
+    if (past.length === 0) return;
+    const entry   = past[past.length - 1];
+    const current = { gardenData, notesData, datesData };
+    setPast(p => p.slice(0, -1));
+    setFuture(f => [current, ...f]);
+    setGardenData(entry.gardenData);
+    setNotesData(entry.notesData);
+    setDatesData(entry.datesData);
+    await syncDiff(gardenData, entry.gardenData, entry.datesData);
+  }, [past, gardenData, notesData, datesData, syncDiff]);
+
+  const redo = useCallback(async () => {
+    if (future.length === 0) return;
+    const entry   = future[0];
+    const current = { gardenData, notesData, datesData };
+    setFuture(f => f.slice(1));
+    setPast(p => [...p, current]);
+    setGardenData(entry.gardenData);
+    setNotesData(entry.notesData);
+    setDatesData(entry.datesData);
+    await syncDiff(gardenData, entry.gardenData, entry.datesData);
+  }, [future, gardenData, notesData, datesData, syncDiff]);
+
   // ── Cell operations ──────────────────────────────────────────────────────────
   const setCell = async (r: number, c: number, plantId: string | null) => {
+    pushHistory({ gardenData, notesData, datesData });
     const sk = `${year}-${season}`;
     const ck = `${r},${c}`;
 
@@ -334,10 +406,11 @@ export function useGardenData() {
     const toCk   = `${to.r},${to.c}`;
 
     const fromPlant = gardenData[sk]?.[fromCk] ?? null;
+    if (!fromPlant) return; // nothing to move
     const fromNote  = notesData[sk]?.[fromCk]  ?? '';
     const fromDate  = datesData[sk]?.[fromCk]  ?? '';
 
-    if (!fromPlant) return; // nothing to move
+    pushHistory({ gardenData, notesData, datesData });
 
     setGardenData(prev => {
       const cells = { ...(prev[sk] ?? {}) };
@@ -367,7 +440,7 @@ export function useGardenData() {
       await upsertPlanting(gid, year, season, to.r, to.c, fromPlant, fromDate);
       if (fromNote.trim()) await upsertNote(gid, year, season, to.r, to.c, fromNote);
     }
-  }, [gardenData, notesData, datesData, year, season, user]);
+  }, [gardenData, notesData, datesData, year, season, user, pushHistory]);
 
   // ── Copy previous season ─────────────────────────────────────────────────────
   const copySeason = useCallback(async (): Promise<boolean> => {
@@ -553,5 +626,7 @@ export function useGardenData() {
     ready,
     syncing: syncing || switching,
     setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
+    // Undo / redo
+    undo, redo, canUndo, canRedo,
   };
 }
