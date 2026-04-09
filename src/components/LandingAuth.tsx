@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '../lib/supabase';
 
-const APP_URL = (import.meta.env.BASE_URL ?? '/huerto/').replace(/\/$/, '') + '/app';
+const APP_URL = (import.meta.env.BASE_URL ?? '/huerto/').replace(/\/$/, '') + '/app/';
 
 export default function LandingAuth() {
   const [open,     setOpen]     = useState(false);
