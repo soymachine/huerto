@@ -546,6 +546,7 @@ body.winter {
 .cbadge-tooltip-portal {
   position: fixed;
   width: 220px;
+  max-width: calc(100vw - 24px);
   background: rgba(30, 22, 10, 0.92);
   color: #FAF8F3;
   padding: 7px 11px;
@@ -1108,7 +1109,7 @@ body.winter {
   :root { --cell-size: 52px; }
   .cell { gap: 1px; padding-bottom: 13px; }
   .cell-emoji { font-size: 0.95rem; }
-  .cell-name  { font-size: 0.44rem; max-width: 44px; }
+  .cell-name  { font-size: 0.6rem; max-width: 44px; }
 
   .overlay { align-items: flex-end; }
   .modal {
@@ -1123,6 +1124,22 @@ body.winter {
   .plant-grid   { grid-template-columns: repeat(3, 1fr); }
   .plant-opt    { padding: 10px 6px 8px; }
   .plant-opt-emoji { font-size: 1.5rem; }
+}
+
+@media (max-width: 480px) {
+  /* Header — ensure ≥40px touch targets */
+  .year-btn        { min-height: 40px; min-width: 40px; }
+  .season-btn      { min-height: 40px; padding: 5px 8px; }
+  .print-btn       { min-height: 40px; }
+  .cfg-trigger-btn { min-height: 40px; }
+
+  /* Modal — tighter padding on very small screens */
+  .modal       { padding: 20px 16px 28px; }
+  .modal-title { font-size: 1.4rem; }
+}
+
+@media (max-width: 380px) {
+  .plant-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
 /* ─── DELETE CONFIRM MODAL ─── */

@@ -900,4 +900,15 @@ body {
   .lp-nav-auth { gap: 8px; }
   .lp-btn-ghost { padding: 7px 12px; font-size: 0.8rem; }
   .lp-btn-primary { padding: 8px 14px; font-size: 0.8rem; }
+  /* Mockup: 3 columns on small phones (768px block sets 4) */
+  .lp-mockup-grid { grid-template-columns: repeat(3, 1fr); }
+  /* Auth dropdown: don't overflow viewport edge */
+  .lp-auth-panel { right: 0; width: min(280px, calc(100vw - 32px)); }
+  /* Section horizontal padding */
+  .lp-section { padding: 0 16px; }
+  /* Hero: less vertical breathing room */
+  .lp-hero { padding: 48px 0 36px; }
+  /* Sections: reduce vertical padding */
+  .lp-features, .lp-how, .lp-testimonials, .lp-pricing { padding: 48px 0; }
+  .lp-cta-banner { padding: 56px 0; }
 }
