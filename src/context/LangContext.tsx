@@ -118,6 +118,15 @@ export interface Translations {
   // Undo / redo
   undo:               string;
   redo:               string;
+  // Plant search
+  searchPlaceholder:  string;
+  searchEmpty:        string;
+  // Export image
+  exportImage:        string;
+  // Landing overlay
+  landingTitle:       string;
+  landingSubtitle:    string;
+  landingStart:       string;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -226,6 +235,12 @@ const ES: Translations = {
   cancel:             'Cancelar',
   undo:               'Deshacer (Ctrl+Z)',
   redo:               'Rehacer (Ctrl+Y)',
+  searchPlaceholder:  'Buscar planta…',
+  searchEmpty:        'Ninguna planta coincide con tu búsqueda.',
+  exportImage:        'Guardar imagen',
+  landingTitle:       'El Huerto',
+  landingSubtitle:    'Planifica tus cultivos temporada a temporada.\nRotación inteligente, asociaciones y recordatorios.',
+  landingStart:       'Empezar',
 };
 
 const EN: Translations = {
@@ -332,6 +347,12 @@ const EN: Translations = {
   cancel:             'Cancel',
   undo:               'Undo (Ctrl+Z)',
   redo:               'Redo (Ctrl+Y)',
+  searchPlaceholder:  'Search plant…',
+  searchEmpty:        'No plants match your search.',
+  exportImage:        'Save image',
+  landingTitle:       'The Garden',
+  landingSubtitle:    'Plan your crops season by season.\nSmart rotation, companion planting and reminders.',
+  landingStart:       'Get started',
 };
 
 export const TRANSLATIONS: Record<Lang, Translations> = { es: ES, en: EN };

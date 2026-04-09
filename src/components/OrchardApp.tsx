@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { ArrowCounterClockwise, ArrowClockwise } from '@phosphor-icons/react';
+import { toPng } from 'html-to-image';
 import type { Lang } from '../context/LangContext';
 import { AuthProvider }   from '../context/AuthContext';
 import { LangProvider, useLang } from '../context/LangContext';
@@ -8,6 +9,7 @@ import { findPlant }      from '../data/plants';
 import { PLANT_INFO }     from '../data/plantInfo';
 import { CROP_FAMILY, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
 import AssociationsTable from './AssociationsTable';
+import LandingOverlay    from './LandingOverlay';
 import type { CellWarnings }                  from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
 import Grid           from './Grid';
@@ -55,6 +57,8 @@ function OrchardInner() {
   const [showAuthModal,    setShowAuthModal]    = useState(false);
   const [showAssociations, setShowAssociations] = useState(false);
   const [showAssocTable,   setShowAssocTable]   = useState(false);
+  const [exportingImg,     setExportingImg]     = useState(false);
+  const gridRef = useRef<HTMLDivElement>(null);
 
   // ── Previous season data ───────────────────────────────────────────────────
   const prevSeasonKey = season === 'summer' ? `${year - 1}-winter` : `${year}-summer`;
@@ -92,6 +96,24 @@ function OrchardInner() {
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [undo, redo]);
+
+  // ── Export to image ───────────────────────────────────────────────────────
+  const handleExportImage = async () => {
+    if (!gridRef.current || exportingImg) return;
+    setExportingImg(true);
+    try {
+      const dataUrl = await toPng(gridRef.current, { cacheBust: true, pixelRatio: 2 });
+      const a = document.createElement('a');
+      const gardenName = gardens.find(g => g.id === activeGardenId)?.name ?? 'huerto';
+      a.download = `${gardenName}-${year}-${season}.png`;
+      a.href = dataUrl;
+      a.click();
+    } catch {
+      // silently fail
+    } finally {
+      setExportingImg(false);
+    }
+  };
 
   // ── Core helpers ──────────────────────────────────────────────────────────
   const seasonKey    = `${year}-${season}`;
@@ -283,6 +305,7 @@ function OrchardInner() {
           <div className="header-tabs-right">
             <button className="print-btn" onClick={undo} disabled={!canUndo} title={t.undo}><ArrowCounterClockwise size={16} weight="bold" /></button>
             <button className="print-btn" onClick={redo} disabled={!canRedo} title={t.redo}><ArrowClockwise size={16} weight="bold" /></button>
+            <button className="print-btn" onClick={handleExportImage} disabled={exportingImg} title={t.exportImage}>📷</button>
             <button className="print-btn" onClick={() => window.print()} title={t.print}>🖨</button>
             <ConfigButton
               cols={cols} rows={rows}
@@ -306,7 +329,7 @@ function OrchardInner() {
         <>
           <div className="grid-outer">
             <button className="grid-insert-btn grid-insert-btn--col" onClick={() => insertCol(0)} title="Insertar columna a la izquierda">＋</button>
-            <div className="grid-scroll">
+            <div className="grid-scroll" ref={gridRef}>
               <div className="grid-insert-wrap">
                 {/* Insert row top */}
                 <button className="grid-insert-btn grid-insert-btn--row" onClick={() => insertRow(0)} title="Insertar fila arriba">＋</button>
@@ -376,7 +399,9 @@ function OrchardInner() {
         <AssociationsTable onClose={() => setShowAssocTable(false)} />
       )}
 
-      <footer className="app-version">v1.4</footer>
+      <footer className="app-version">v1.5</footer>
+
+      <LandingOverlay />
 
     </div>
   );

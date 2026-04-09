@@ -1,7 +1,7 @@
 {
   "name": "el-huerto",
   "type": "module",
-  "version": "1.4.0",
+"version": "1.5.0",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
@@ -12,6 +12,7 @@
     "@phosphor-icons/react": "^2.1.10",
     "@supabase/supabase-js": "^2.99.1",
     "astro": "^5.0.0",
+    "html-to-image": "^1.11.13",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

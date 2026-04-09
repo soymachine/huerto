@@ -1,0 +1,17 @@
+{
+  "name": "El Huerto",
+  "short_name": "Huerto",
+  "description": "Planificador visual de huertos urbanos y familiares",
+  "start_url": "/huerto/",
+  "scope": "/huerto/",
+  "display": "standalone",
+  "orientation": "any",
+  "theme_color": "#3A6020",
+  "background_color": "#F5F0E4",
+  "lang": "es",
+  "icons": [
+    { "src": "/huerto/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" },
+    { "src": "/huerto/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/huerto/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

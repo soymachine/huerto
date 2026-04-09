@@ -4,7 +4,6 @@ import { PLANT_INFO } from '../data/plantInfo';
 import PlantInfoModal from './PlantInfoModal';
 import { useLang } from '../context/LangContext';
 import type { Season } from '../lib/storage';
-
 export interface RotationWarning { prevPlantName: string; familyLabel: string; }
 export interface CompatWarning   { id: string; name: string; emoji: string; }
 
@@ -28,6 +27,7 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
   const { t, lang } = useLang();
   const [infoPlantId, setInfoPlantId] = useState<string | null>(null);
   const [localNote,   setLocalNote]   = useState(note);
+  const [search,      setSearch]      = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { setLocalNote(note); }, [note]);
@@ -50,6 +50,13 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
     [...plants].sort((a, b) =>
       (lang === 'en' ? a.nameEn : a.name).localeCompare(lang === 'en' ? b.nameEn : b.name)
     );
+
+  // Filter by search
+  const q = search.trim().toLowerCase();
+  const filterPlants = (plants: typeof PLANTS[string]) =>
+    q ? plants.filter(p =>
+      p.name.toLowerCase().includes(q) || (p.nameEn ?? '').toLowerCase().includes(q)
+    ) : plants;
 
   return (
     <div className="modal modal-wide" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
@@ -114,13 +121,28 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
         </div>
       )}
 
+      {/* ── Search ── */}
+      <div className="plant-search-wrap">
+        <input
+          className="plant-search-input"
+          type="search"
+          placeholder={t.searchPlaceholder}
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+
       {/* ── Plant grid ── */}
       <div>
-        {Object.entries(PLANTS).map(([cat, plants]) => (
+        {Object.entries(PLANTS).map(([cat, plants]) => {
+          const visible = sortedPlants(filterPlants(plants));
+          if (visible.length === 0) return null;
+          return (
           <div key={cat}>
             <div className="modal-cat-label">{t.categories[cat] ?? cat}</div>
             <div className="plant-grid">
-              {sortedPlants(plants).map(p => (
+              {visible.map(p => (
                 <div
                   key={p.id}
                   className={`plant-opt${p.id === currentPlant ? ' chosen' : ''}`}
@@ -142,7 +164,11 @@ export default function PlantModal({ cell, season, year, currentPlant, note, dat
               ))}
             </div>
           </div>
-        ))}
+          );
+        })}
+        {q && Object.values(PLANTS).every(pl => filterPlants(pl).length === 0) && (
+          <p className="plant-search-empty">{t.searchEmpty}</p>
+        )}
       </div>
 
       {/* ── Notes ── */}
