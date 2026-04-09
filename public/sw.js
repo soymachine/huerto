@@ -1,8 +1,8 @@
 // El Huerto — Service Worker
 // Provides offline shell caching so the app is installable and loads fast.
 
-const CACHE = 'huerto-v1.4';
-const SHELL = ['/huerto/', '/huerto/index.html'];
+const CACHE = 'huerto-v1.5';
+const SHELL = ['/huerto/app', '/huerto/app/index.html'];
 
 self.addEventListener('install', e => {
   self.skipWaiting();

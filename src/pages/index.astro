@@ -1,5 +1,35 @@
 ---
-import OrchardApp from '../components/OrchardApp';
+import LandingAuth from '../components/LandingAuth';
+import '../styles/landing.css';
+
+const APP_URL = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/app`;
+
+const mockupCells = [
+  { emoji: '🍅', label: 'Tomate',    filled: true },
+  { emoji: '🫑', label: 'Pimiento',  filled: true },
+  { emoji: '🥒', label: 'Pepino',    filled: true },
+  { emoji: '🌿', label: 'Albahaca',  filled: true },
+  { emoji: '🧄', label: 'Ajo',       filled: true },
+  { emoji: '🥬', label: 'Lechuga',   filled: true },
+  { emoji: '🥕', label: 'Zanahoria', filled: true },
+  { emoji: '🫘', label: 'Judías',    filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🌱', label: 'Rúcula',    filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🧅', label: 'Cebolla',   filled: true },
+  { emoji: '🥦', label: 'Brócoli',   filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🌶️', label: 'Chile',     filled: true },
+  { emoji: '🥗', label: 'Espinaca',  filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🍓', label: 'Fresa',     filled: true },
+  { emoji: '🌿', label: 'Perejil',   filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🥬', label: 'Col',       filled: true },
+  { emoji: '',   label: '',           filled: false },
+  { emoji: '🧄', label: 'Puerro',    filled: true },
+  { emoji: '',   label: '',           filled: false },
+];
 ---
 
 <!doctype html>
@@ -7,10 +37,8 @@ import OrchardApp from '../components/OrchardApp';
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Planificador visual de huertos urbanos y familiares. Rotación de cultivos, asociaciones entre plantas y recordatorios de siembra." />
-    <title>El Huerto — Planificador de cultivos</title>
-    <link rel="manifest" href="/huerto/manifest.json" />
-    <meta name="theme-color" content="#3A6020" />
+    <meta name="description" content="Planifica tu huerto como nunca antes. Rotación inteligente de cultivos, asociaciones entre plantas y calendario de siembra. Gratis para empezar." />
+    <title>El Huerto — Planificador de cultivos para el hogar</title>
     <link rel="icon" href="/huerto/icon.svg" type="image/svg+xml" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -18,15 +46,342 @@ import OrchardApp from '../components/OrchardApp';
       href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Lato:wght@300;400;700&display=swap"
       rel="stylesheet"
     />
-    <script>
-      if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-          navigator.serviceWorker.register('/huerto/sw.js').catch(() => {});
-        });
-      }
-    </script>
   </head>
   <body>
-    <OrchardApp client:load />
+
+    <!-- ── NAV ── -->
+    <nav class="lp-nav">
+      <div class="lp-nav-inner">
+        <a href="#" class="lp-logo">
+          <span class="lp-logo-icon">🌱</span>
+          El Huerto
+        </a>
+        <ul class="lp-nav-links">
+          <li><a href="#features">Características</a></li>
+          <li><a href="#how">Cómo funciona</a></li>
+          <li><a href="#pricing">Precios</a></li>
+        </ul>
+        <div class="lp-nav-spacer"></div>
+        <div class="lp-nav-auth">
+          <LandingAuth client:load />
+          <a href={APP_URL} class="lp-btn-primary">Pruébalo gratis →</a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- ── HERO ── -->
+    <section class="lp-hero">
+      <div class="lp-section">
+        <div class="lp-hero-badge">🌱 Planificación inteligente de huertos</div>
+        <h1>Tu huerto,<br /><em>planificado con cabeza</em></h1>
+        <p class="lp-hero-sub">
+          Organiza tus cultivos temporada a temporada. Sabe qué plantar,
+          cuándo y junto a qué para obtener la mejor cosecha.
+        </p>
+        <div class="lp-hero-ctas">
+          <a href={APP_URL} class="lp-btn-hero">🌱 Pruébalo gratis</a>
+          <a href="#features" class="lp-btn-hero-ghost">Ver características</a>
+        </div>
+        <p class="lp-hero-note">Sin tarjeta de crédito · Funciona sin cuenta</p>
+
+        <!-- App mockup -->
+        <div class="lp-hero-visual" style="margin-top: 48px;">
+          <div class="lp-mockup">
+            <div class="lp-mockup-bar">
+              <div class="lp-mockup-dot"></div>
+              <div class="lp-mockup-dot"></div>
+              <div class="lp-mockup-dot"></div>
+              <div class="lp-mockup-url">🔒 elhuerto.app · ☀️ Verano 2025</div>
+            </div>
+            <div class="lp-mockup-grid">
+              {mockupCells.map((cell) => (
+                <div class={`lp-mockup-cell ${cell.filled ? 'filled' : 'empty'}`}>
+                  {cell.emoji && <span>{cell.emoji}</span>}
+                  {cell.label && <span class="lp-mockup-label">{cell.label}</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── SOCIAL PROOF ── -->
+    <section class="lp-social">
+      <div class="lp-section">
+        <div class="lp-social-inner">
+          <div class="lp-social-stat">
+            <strong>51</strong>
+            <span>Plantas disponibles</span>
+          </div>
+          <div class="lp-social-sep"></div>
+          <div class="lp-social-stat">
+            <strong>13</strong>
+            <span>Familias botánicas</span>
+          </div>
+          <div class="lp-social-sep"></div>
+          <div class="lp-social-stat">
+            <strong>2</strong>
+            <span>Temporadas por año</span>
+          </div>
+          <div class="lp-social-sep"></div>
+          <div class="lp-social-stat">
+            <strong>100%</strong>
+            <span>Gratuito para empezar</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── FEATURES ── -->
+    <section class="lp-features" id="features">
+      <div class="lp-section">
+        <p class="lp-section-label">Características</p>
+        <h2 class="lp-section-title">Todo lo que necesitas<br />para planificar mejor</h2>
+        <p class="lp-section-sub">Diseñado para hortelanos caseros que quieren resultados sin complicaciones.</p>
+
+        <div class="lp-features-grid">
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">🗺️</span>
+            <h3>Cuadrícula visual</h3>
+            <p>Diseña tu huerto parcela a parcela. Visualiza la distribución completa de un vistazo y arrastra plantas entre casillas.</p>
+          </div>
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">↺</span>
+            <h3>Rotación de cultivos</h3>
+            <p>El sistema detecta automáticamente si estás repitiendo familia botánica y te avisa para proteger la salud del suelo.</p>
+          </div>
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">🤝</span>
+            <h3>Plantas compañeras</h3>
+            <p>Descubre qué plantas se ayudan entre sí y cuáles se perjudican. Alertas visuales en tiempo real.</p>
+          </div>
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">📅</span>
+            <h3>Calendario de siembra</h3>
+            <p>Ve de un vistazo cuándo sembrar, trasplantar y cosechar cada variedad según tus elecciones de temporada.</p>
+          </div>
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">📧</span>
+            <h3>Recordatorios mensuales</h3>
+            <p>Recibe un email el 1 de cada mes con las tareas pendientes de tu huerto. No olvides nada.</p>
+          </div>
+          <div class="lp-feature-card">
+            <span class="lp-feature-icon">📱</span>
+            <h3>Funciona sin conexión</h3>
+            <p>Instálalo como app en tu móvil y úsalo en el campo aunque no tengas cobertura. Progressive Web App.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── HOW IT WORKS ── -->
+    <section class="lp-how" id="how">
+      <div class="lp-section">
+        <p class="lp-section-label">Cómo funciona</p>
+        <h2 class="lp-section-title">En tres pasos sencillos</h2>
+        <div class="lp-how-steps">
+          <div class="lp-step">
+            <div class="lp-step-num">1</div>
+            <h3>Crea tu huerto</h3>
+            <p>Define el tamaño de tu cuadrícula según el espacio real. Sin instalación ni configuración.</p>
+          </div>
+          <div class="lp-step">
+            <div class="lp-step-num">2</div>
+            <h3>Elige tus plantas</h3>
+            <p>Busca entre 51 variedades y colócalas en las parcelas. El sistema te guía con alertas inteligentes.</p>
+          </div>
+          <div class="lp-step">
+            <div class="lp-step-num">3</div>
+            <h3>Planifica y cosecha</h3>
+            <p>Consulta el calendario, recibe recordatorios y repite la rotación cada temporada.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TESTIMONIALS ── -->
+    <section class="lp-testimonials">
+      <div class="lp-section">
+        <p class="lp-section-label">Opiniones</p>
+        <h2 class="lp-section-title">Lo que dicen los hortelanos</h2>
+        <div class="lp-testimonials-grid">
+          <div class="lp-testimonial">
+            <div class="lp-testimonial-stars">★★★★★</div>
+            <p class="lp-testimonial-text">
+              "Por fin una app que entiende que la rotación de cultivos es clave. Me avisó de que había puesto tomates dos años seguidos en el mismo sitio."
+            </p>
+            <div class="lp-testimonial-author">
+              <div class="lp-testimonial-avatar">👩‍🌾</div>
+              <div>
+                <div class="lp-testimonial-name">María C.</div>
+                <div class="lp-testimonial-role">Hortelana urbana, Barcelona</div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-testimonial">
+            <div class="lp-testimonial-stars">★★★★★</div>
+            <p class="lp-testimonial-text">
+              "Uso el calendario para saber exactamente cuándo trasplantar los pimientos. Este año tuve la mejor cosecha que recuerdo."
+            </p>
+            <div class="lp-testimonial-author">
+              <div class="lp-testimonial-avatar">👨‍🌾</div>
+              <div>
+                <div class="lp-testimonial-name">Jordi M.</div>
+                <div class="lp-testimonial-role">Aficionado, Valencia</div>
+              </div>
+            </div>
+          </div>
+          <div class="lp-testimonial">
+            <div class="lp-testimonial-stars">★★★★★</div>
+            <p class="lp-testimonial-text">
+              "Lo tengo instalado en el móvil. Lo consulto mientras estoy en el huerto sin necesidad de cobertura. Imprescindible."
+            </p>
+            <div class="lp-testimonial-author">
+              <div class="lp-testimonial-avatar">🧑‍🌾</div>
+              <div>
+                <div class="lp-testimonial-name">Ana R.</div>
+                <div class="lp-testimonial-role">Jardín familiar, Madrid</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── PRICING ── -->
+    <section class="lp-pricing" id="pricing">
+      <div class="lp-section">
+        <p class="lp-section-label">Precios</p>
+        <h2 class="lp-section-title">Sencillo y transparente</h2>
+        <p class="lp-section-sub">Empieza gratis. Sin compromisos. Amplía cuando lo necesites.</p>
+
+        <div class="lp-pricing-grid">
+
+          <!-- FREE -->
+          <div class="lp-plan">
+            <div class="lp-plan-name">Gratis</div>
+            <div class="lp-plan-price">
+              <span class="lp-plan-amount">€0</span>
+              <span class="lp-plan-period"> para siempre</span>
+            </div>
+            <p class="lp-plan-desc">Todo lo que necesitas para empezar a planificar tu huerto.</p>
+            <ul class="lp-plan-features">
+              <li>1 huerto</li>
+              <li>Cuadrícula hasta 20×30 parcelas</li>
+              <li>51 plantas con fichas detalladas</li>
+              <li>Rotación y alertas de compatibilidad</li>
+              <li>Calendario de siembra</li>
+              <li>Funciona sin conexión (PWA)</li>
+              <li class="na">Sincronización en la nube</li>
+              <li class="na">Recordatorios por email</li>
+              <li class="na">Huertos ilimitados</li>
+            </ul>
+            <a href={APP_URL} class="lp-plan-cta outline">Empezar gratis</a>
+          </div>
+
+          <!-- PRO -->
+          <div class="lp-plan featured">
+            <div class="lp-plan-badge">Más popular</div>
+            <div class="lp-plan-name">Pro</div>
+            <div class="lp-plan-price">
+              <span class="lp-plan-amount">€4</span>
+              <span class="lp-plan-period">/mes</span>
+            </div>
+            <p class="lp-plan-desc">Para el hortelano comprometido que quiere el máximo control.</p>
+            <ul class="lp-plan-features">
+              <li>Huertos ilimitados</li>
+              <li>Cuadrícula hasta 20×30 parcelas</li>
+              <li>51 plantas con fichas detalladas</li>
+              <li>Rotación y alertas de compatibilidad</li>
+              <li>Calendario de siembra</li>
+              <li>Funciona sin conexión (PWA)</li>
+              <li>Sincronización en la nube</li>
+              <li>Recordatorios por email</li>
+              <li class="na">Acceso multiusuario</li>
+            </ul>
+            <button class="lp-plan-cta disabled" disabled>Próximamente</button>
+          </div>
+
+          <!-- FAMILIAR -->
+          <div class="lp-plan">
+            <div class="lp-plan-name">Familiar</div>
+            <div class="lp-plan-price">
+              <span class="lp-plan-amount">€8</span>
+              <span class="lp-plan-period">/mes</span>
+            </div>
+            <p class="lp-plan-desc">Para familias o grupos que comparten un huerto comunitario.</p>
+            <ul class="lp-plan-features">
+              <li>Todo lo de Pro</li>
+              <li>Hasta 5 usuarios</li>
+              <li>Huertos compartidos en tiempo real</li>
+              <li>Roles: administrador / colaborador</li>
+              <li>Historial de cambios</li>
+              <li>Soporte prioritario por email</li>
+              <li>Funciona sin conexión (PWA)</li>
+            </ul>
+            <button class="lp-plan-cta disabled" disabled>Próximamente</button>
+          </div>
+
+        </div>
+        <p class="lp-pricing-note">
+          Los planes de pago se activarán próximamente.
+          Regístrate ahora para ser de los primeros en acceder.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── CTA BANNER ── -->
+    <section class="lp-cta-banner">
+      <div class="lp-section">
+        <h2>¿Listo para planificar<br />mejor tu huerto?</h2>
+        <p>Empieza gratis hoy. Sin registro, sin tarjeta. Solo tú y tus plantas.</p>
+        <a href={APP_URL} class="lp-btn-white">🌱 Probar ahora, es gratis</a>
+      </div>
+    </section>
+
+    <!-- ── FOOTER ── -->
+    <footer class="lp-footer">
+      <div class="lp-footer-inner">
+        <div class="lp-footer-top">
+          <div>
+            <a href="#" class="lp-footer-brand">🌱 El Huerto</a>
+            <p class="lp-footer-tagline">Planificador estacional de cultivos para el hogar.</p>
+          </div>
+          <div class="lp-footer-links">
+            <h4>App</h4>
+            <ul>
+              <li><a href={APP_URL}>Abrir planificador</a></li>
+              <li><a href="#features">Características</a></li>
+              <li><a href="#pricing">Precios</a></li>
+            </ul>
+          </div>
+          <div class="lp-footer-links">
+            <h4>Soporte</h4>
+            <ul>
+              <li><a href="#how">Cómo funciona</a></li>
+              <li><a href="mailto:hola@elhuerto.app">Contacto</a></li>
+            </ul>
+          </div>
+        </div>
+        <div class="lp-footer-bottom">
+          <span>© 2025 El Huerto · Hecho con 🌱 en España</span>
+          <span>v1.5</span>
+        </div>
+      </div>
+    </footer>
+
+    <script>
+      document.querySelectorAll('a[href^="#"]').forEach(a => {
+        a.addEventListener('click', e => {
+          const id = (a as HTMLAnchorElement).getAttribute('href')?.slice(1);
+          if (!id) return;
+          const el = document.getElementById(id);
+          if (!el) return;
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+      });
+    </script>
   </body>
 </html>

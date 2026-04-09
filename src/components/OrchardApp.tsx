@@ -9,7 +9,6 @@ import { findPlant }      from '../data/plants';
 import { PLANT_INFO }     from '../data/plantInfo';
 import { CROP_FAMILY, getPreviousSeasonKey, hasRotationIssue } from '../data/cropFamilies';
 import AssociationsTable from './AssociationsTable';
-import LandingOverlay    from './LandingOverlay';
 import type { CellWarnings }                  from './Grid';
 import type { RotationWarning, CompatWarning } from './PlantModal';
 import Grid           from './Grid';
@@ -400,8 +399,6 @@ function OrchardInner() {
       )}
 
       <footer className="app-version">v1.5</footer>
-
-      <LandingOverlay />
 
     </div>
   );
