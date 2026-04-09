@@ -2,7 +2,7 @@
   "name": "El Huerto",
   "short_name": "Huerto",
   "description": "Planificador visual de huertos urbanos y familiares",
-  "start_url": "/huerto/app",
+  "start_url": "/huerto/app/",
   "scope": "/huerto/",
   "display": "standalone",
   "orientation": "any",
