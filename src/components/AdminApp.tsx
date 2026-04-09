@@ -82,7 +82,7 @@ function AdminInner() {
   const [exporting,    setExporting]    = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
-  const isAdmin = user?.email && ADMIN_EMAIL && user.email === ADMIN_EMAIL;
+  const isAdmin = user?.email && ADMIN_EMAIL && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   // Load users on mount (once admin is confirmed)
   useEffect(() => {
@@ -167,10 +167,28 @@ function AdminInner() {
     );
   }
 
-  if (!isAdmin) {
+  if (!ADMIN_EMAIL) {
+    return (
+      <div style={s.page}>
+        <p style={{ ...s.muted, color: '#B04A28' }}>
+          La variable <code>PUBLIC_ADMIN_EMAIL</code> no está configurada en el build.
+          Añade el secret <code>ADMIN_EMAIL</code> en GitHub y vuelve a lanzar el deploy del site.
+        </p>
+        <p style={{ ...s.muted, fontSize: '0.8rem', marginTop: 8 }}>
+          Usuario actual: <strong>{user.email}</strong>
+        </p>
+        <a href={import.meta.env.BASE_URL || '/'} style={s.link}>← Volver al huerto</a>
+      </div>
+    );
+  }
+
+  if (user.email?.toLowerCase() !== ADMIN_EMAIL.toLowerCase()) {
     return (
       <div style={s.page}>
         <p style={s.muted}>No tienes permisos para acceder a esta página.</p>
+        <p style={{ ...s.muted, fontSize: '0.8rem', marginTop: 8 }}>
+          Usuario actual: <strong>{user.email}</strong>
+        </p>
         <a href={import.meta.env.BASE_URL || '/'} style={s.link}>← Volver al huerto</a>
       </div>
     );
