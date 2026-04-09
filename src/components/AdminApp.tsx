@@ -46,8 +46,8 @@ async function callAdmin(action: string, extra?: object) {
     body: JSON.stringify({ action, ...extra }),
   });
 
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error ?? `HTTP ${res.status}`);
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error ?? data.message ?? `HTTP ${res.status}`);
   return data;
 }
 

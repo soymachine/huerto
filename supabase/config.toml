@@ -4,4 +4,4 @@
 project_id = "el-huerto"
 
 [functions.admin-backup]
-verify_jwt = true
+verify_jwt = false
