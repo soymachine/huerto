@@ -1,0 +1,7 @@
+# Supabase project configuration
+# project_id is used by the CLI to identify the project locally.
+# The actual deployment target is set via --project-ref in CI.
+project_id = "el-huerto"
+
+[functions.admin-backup]
+verify_jwt = true
