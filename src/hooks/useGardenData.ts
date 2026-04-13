@@ -19,6 +19,7 @@ import {
   fetchNotes, upsertNote, dbNotesToNotesData,
   shiftGardenRows, shiftGardenCols,
   deleteGardenRowData, deleteGardenColData,
+  insertLog,
 } from '../lib/db';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -62,6 +63,12 @@ export function useGardenData() {
   const canRedo = useMemo(() => future.length > 0, [future]);
 
   const clearHistory = useCallback(() => { setPast([]); setFuture([]); }, []);
+
+  // Fire-and-forget log — only for authenticated users, never blocks the UI
+  const log = useCallback((action: Parameters<typeof insertLog>[1], meta: Record<string, unknown> = {}) => {
+    if (!user) return;
+    insertLog(user.id, action, meta, activeIdRef.current);
+  }, [user]);
 
   // Capture a snapshot before a mutation (also clears redo)
   const pushHistory = useCallback((entry: HistoryEntry) => {
@@ -233,6 +240,7 @@ export function useGardenData() {
       const g = await dbCreateGarden(user.id, name);
       const meta: GardenMeta = { id: g.id, name: g.name, cols: g.cols, rows: g.rows };
       setGardens(prev => [...prev, meta]);
+      insertLog(user.id, 'garden_create', { name, cols: g.cols, rows: g.rows }, g.id);
       await switchGarden(meta.id);
     } else {
       const meta: LocalGarden = { id: genId(), name, cols: 6, rows: 10 };
@@ -253,17 +261,20 @@ export function useGardenData() {
 
   // ── Rename garden ─────────────────────────────────────────────────────────────
   const renameGarden = useCallback(async (id: string, name: string) => {
+    const oldName = gardens.find(g => g.id === id)?.name;
     setGardens(prev => prev.map(g => g.id === id ? { ...g, name } : g));
     if (user) {
       await dbRenameGarden(id, name);
+      insertLog(user.id, 'garden_rename', { old_name: oldName, new_name: name }, id);
     } else {
       const list = loadGardens();
       saveGardens(list.map(g => g.id === id ? { ...g, name } : g));
     }
-  }, [user]);
+  }, [user, gardens]);
 
   // ── Delete garden ─────────────────────────────────────────────────────────────
   const deleteGarden = useCallback(async (id: string) => {
+    const name = gardens.find(g => g.id === id)?.name;
     let next = gardens.filter(g => g.id !== id);
     if (next.length === 0) {
       const fallback: LocalGarden = { id: genId(), name: 'Mi Huerto', cols: 6, rows: 10 };
@@ -274,6 +285,7 @@ export function useGardenData() {
 
     if (user) {
       await dbDeleteGarden(id);
+      insertLog(user.id, 'garden_delete', { name }, id);
     } else {
       saveGardens(next);
       clearGardenData(id);
@@ -322,7 +334,8 @@ export function useGardenData() {
     setNotesData(entry.notesData);
     setDatesData(entry.datesData);
     await syncDiff(gardenData, entry.gardenData, entry.datesData);
-  }, [past, gardenData, notesData, datesData, syncDiff]);
+    log('undo', {});
+  }, [past, gardenData, notesData, datesData, syncDiff, log]);
 
   const redo = useCallback(async () => {
     if (future.length === 0) return;
@@ -334,7 +347,8 @@ export function useGardenData() {
     setNotesData(entry.notesData);
     setDatesData(entry.datesData);
     await syncDiff(gardenData, entry.gardenData, entry.datesData);
-  }, [future, gardenData, notesData, datesData, syncDiff]);
+    log('redo', {});
+  }, [future, gardenData, notesData, datesData, syncDiff, log]);
 
   // ── Cell operations ──────────────────────────────────────────────────────────
   const setCell = async (r: number, c: number, plantId: string | null) => {
@@ -353,10 +367,12 @@ export function useGardenData() {
     if (user && gid) {
       if (plantId === null) {
         await removePlanting(gid, year, season, r, c);
+        log('plant_remove', { year, season, row: r, col: c });
       } else {
         // Include any existing planting date so it survives plant changes
         const currentDate = datesData[sk]?.[ck] ?? '';
         await upsertPlanting(gid, year, season, r, c, plantId, currentDate);
+        log('plant_set', { year, season, row: r, col: c, plant_id: plantId });
       }
     }
   };
@@ -374,8 +390,11 @@ export function useGardenData() {
     });
 
     const gid = activeIdRef.current;
-    if (user && gid) await upsertNote(gid, year, season, r, c, text);
-  }, [user, year, season]);
+    if (user && gid) {
+      await upsertNote(gid, year, season, r, c, text);
+      log('note_set', { year, season, row: r, col: c, has_content: text.trim().length > 0 });
+    }
+  }, [user, year, season, log]);
 
   // ── Date operations ───────────────────────────────────────────────────────────
   const setDate = useCallback(async (r: number, c: number, date: string) => {
@@ -393,8 +412,9 @@ export function useGardenData() {
       const plantId = gardenData[sk]?.[ck];
       if (plantId) await upsertPlanting(gid, year, season, r, c, plantId, date);
       // If no plant yet, date will be included when setCell is called
+      log('date_set', { year, season, row: r, col: c, date });
     }
-  }, [user, year, season, gardenData]);
+  }, [user, year, season, gardenData, log]);
 
   // ── Move cell (drag & drop) ───────────────────────────────────────────────────
   const moveCell = useCallback(async (
@@ -439,8 +459,9 @@ export function useGardenData() {
       await upsertNote(gid, year, season, from.r, from.c, '');
       await upsertPlanting(gid, year, season, to.r, to.c, fromPlant, fromDate);
       if (fromNote.trim()) await upsertNote(gid, year, season, to.r, to.c, fromNote);
+      log('plant_move', { year, season, from_r: from.r, from_c: from.c, to_r: to.r, to_c: to.c, plant_id: fromPlant });
     }
-  }, [gardenData, notesData, datesData, year, season, user, pushHistory]);
+  }, [gardenData, notesData, datesData, year, season, user, pushHistory, log]);
 
   // ── Copy previous season ─────────────────────────────────────────────────────
   const copySeason = useCallback(async (): Promise<boolean> => {
@@ -456,12 +477,13 @@ export function useGardenData() {
       setSyncing(true);
       try {
         await bulkUpsertPlantings(gid, year, season, fromData);
+        log('season_copy', { year, season, count: Object.keys(fromData).length });
       } finally {
         setSyncing(false);
       }
     }
     return true;
-  }, [gardenData, year, season, user]);
+  }, [gardenData, year, season, user, log]);
 
   // ── Grid size operations ──────────────────────────────────────────────────────
   const handleSetCols = async (newCols: number) => {
@@ -520,9 +542,11 @@ export function useGardenData() {
     }
     setRows(newRows);
     setGardens(prev => prev.map(g => g.id === gid ? { ...g, rows: newRows } : g));
-    if (user && gid) await updateGardenSize(gid, cols, newRows);
-    else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
-  }, [rows, cols, gardenData, notesData, datesData, user]);
+    if (user && gid) {
+      await updateGardenSize(gid, cols, newRows);
+      log('row_insert', { at, new_rows: newRows });
+    } else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g)); }
+  }, [rows, cols, gardenData, notesData, datesData, user, log]);
 
   // Remove a specific axis-index and shift remaining indices down by 1
   const filterAndShiftCells = (data: NestedRecord, axis: 'row' | 'col', idx: number): NestedRecord => {
@@ -556,13 +580,14 @@ export function useGardenData() {
       await deleteGardenRowData(gid, r);
       if (r < newRows) await shiftGardenRows(gid, -1, r + 1);
       await updateGardenSize(gid, cols, newRows);
+      log('row_delete', { row_index: r, new_rows: newRows });
     } else if (gid) {
       saveGardenData(gid, newGarden);
       saveGardenNotes(gid, newNotes);
       saveGardenDates(gid, newDates);
       const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, rows: newRows } : g));
     }
-  }, [rows, cols, gardenData, notesData, datesData, user]);
+  }, [rows, cols, gardenData, notesData, datesData, user, log]);
 
   // at = col index to insert BEFORE (0 = left, cols = right/append)
   const insertCol = useCallback(async (at: number) => {
@@ -585,9 +610,11 @@ export function useGardenData() {
     }
     setCols(newCols);
     setGardens(prev => prev.map(g => g.id === gid ? { ...g, cols: newCols } : g));
-    if (user && gid) await updateGardenSize(gid, newCols, rows);
-    else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g)); }
-  }, [rows, cols, gardenData, notesData, datesData, user]);
+    if (user && gid) {
+      await updateGardenSize(gid, newCols, rows);
+      log('col_insert', { at, new_cols: newCols });
+    } else if (gid) { const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g)); }
+  }, [rows, cols, gardenData, notesData, datesData, user, log]);
 
   const deleteCol = useCallback(async (c: number) => {
     if (cols <= 1) return;
@@ -605,13 +632,14 @@ export function useGardenData() {
       await deleteGardenColData(gid, c);
       if (c < newCols) await shiftGardenCols(gid, -1, c + 1);
       await updateGardenSize(gid, newCols, rows);
+      log('col_delete', { col_index: c, new_cols: newCols });
     } else if (gid) {
       saveGardenData(gid, newGarden);
       saveGardenNotes(gid, newNotes);
       saveGardenDates(gid, newDates);
       const l = loadGardens(); saveGardens(l.map(g => g.id === gid ? { ...g, cols: newCols } : g));
     }
-  }, [rows, cols, gardenData, notesData, datesData, user]);
+  }, [rows, cols, gardenData, notesData, datesData, user, log]);
 
   return {
     // Garden management

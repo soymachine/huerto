@@ -118,5 +118,22 @@ Deno.serve(async (req: Request) => {
     return json({ ok: true, results });
   }
 
+  // ── logs ──────────────────────────────────────────────────────────────────
+  if (action === 'logs') {
+    const { userId, page = 0, pageSize = 100 } = body as {
+      userId?: string; page?: number; pageSize?: number;
+    };
+    if (!userId) return json({ error: 'userId required' }, 400);
+    const from = page * pageSize;
+    const to   = from + pageSize - 1;
+    const { data, count } = await sb
+      .from('logs')
+      .select('*', { count: 'exact' })
+      .eq('user_id', userId)
+      .order('created_at', { ascending: false })
+      .range(from, to);
+    return json({ logs: data ?? [], total: count ?? 0, page, pageSize });
+  }
+
   return json({ error: `Unknown action: ${action}` }, 400);
 });

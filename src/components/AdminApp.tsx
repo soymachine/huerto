@@ -27,6 +27,15 @@ interface ImportResult {
   results: Record<string, string>;
 }
 
+interface LogEntry {
+  id:         string;
+  user_id:    string;
+  garden_id:  string | null;
+  action:     string;
+  meta:       Record<string, unknown>;
+  created_at: string;
+}
+
 // ─── Edge function call helper ────────────────────────────────────────────────
 
 const ADMIN_EMAIL = import.meta.env.PUBLIC_ADMIN_EMAIL as string | undefined;
@@ -82,6 +91,14 @@ function AdminInner() {
   const [exporting,    setExporting]    = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  // ── Logs state ─────────────────────────────────────────────────────────────
+  const [logsUserId,    setLogsUserId]    = useState<string>('');
+  const [logs,          setLogs]          = useState<LogEntry[]>([]);
+  const [logsTotal,     setLogsTotal]     = useState(0);
+  const [logsPage,      setLogsPage]      = useState(0);
+  const [loadingLogs,   setLoadingLogs]   = useState(false);
+  const PAGE_SIZE = 100;
+
   const isAdmin = user?.email && ADMIN_EMAIL && user.email.toLowerCase() === ADMIN_EMAIL.toLowerCase();
 
   // Load users on mount (once admin is confirmed)
@@ -102,6 +119,21 @@ function AdminInner() {
       setStatus({ msg: (e as Error).message, ok: false });
     } finally {
       setLoadingUsers(false);
+    }
+  }
+
+  async function fetchLogs(userId: string, page = 0) {
+    if (!userId) return;
+    setLoadingLogs(true);
+    try {
+      const res = await callAdmin('logs', { userId, page, pageSize: PAGE_SIZE });
+      setLogs(res.logs);
+      setLogsTotal(res.total);
+      setLogsPage(page);
+    } catch (e: unknown) {
+      setStatus({ msg: (e as Error).message, ok: false });
+    } finally {
+      setLoadingLogs(false);
     }
   }
 
@@ -252,6 +284,108 @@ function AdminInner() {
               </tbody>
             </table>
           </div>
+        )}
+      </section>
+
+      {/* Logs */}
+      <section style={s.section}>
+        <h2 style={s.h2}>Logs de actividad</h2>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginTop: 12, flexWrap: 'wrap' as const }}>
+          <select
+            style={s.select}
+            value={logsUserId}
+            onChange={e => {
+              setLogsUserId(e.target.value);
+              setLogs([]);
+              setLogsTotal(0);
+              setLogsPage(0);
+            }}
+          >
+            <option value="">— Selecciona un usuario —</option>
+            {users.map(u => (
+              <option key={u.id} value={u.id}>{u.email}</option>
+            ))}
+          </select>
+          <button
+            style={s.btnGhost}
+            disabled={!logsUserId || loadingLogs}
+            onClick={() => fetchLogs(logsUserId, 0)}
+          >
+            {loadingLogs ? 'Cargando…' : 'Ver logs'}
+          </button>
+        </div>
+
+        {logs.length > 0 && (
+          <>
+            <div style={{ ...s.tableWrap, marginTop: 16 }}>
+              <table style={s.table}>
+                <thead>
+                  <tr>
+                    <th style={s.th}>Fecha</th>
+                    <th style={s.th}>Acción</th>
+                    <th style={s.th}>Huerto</th>
+                    <th style={s.th}>Meta</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map(l => (
+                    <tr key={l.id} style={s.tr}>
+                      <td style={{ ...s.td, ...s.tdMuted, whiteSpace: 'nowrap' as const }}>
+                        {new Date(l.created_at).toLocaleString('es-ES', {
+                          day: '2-digit', month: 'short', year: 'numeric',
+                          hour: '2-digit', minute: '2-digit',
+                        })}
+                      </td>
+                      <td style={s.td}>
+                        <code style={s.code}>{l.action}</code>
+                      </td>
+                      <td style={{ ...s.td, ...s.tdMuted, fontSize: '0.78rem' }}>
+                        {l.garden_id ? l.garden_id.slice(0, 8) + '…' : '—'}
+                      </td>
+                      <td style={{ ...s.td, ...s.tdMuted, fontSize: '0.78rem', maxWidth: 260, overflow: 'hidden' as const, textOverflow: 'ellipsis' as const, whiteSpace: 'nowrap' as const }}>
+                        {Object.keys(l.meta).length > 0
+                          ? Object.entries(l.meta).map(([k, v]) => `${k}:${v}`).join(' · ')
+                          : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {logsTotal > PAGE_SIZE && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 12 }}>
+                <button
+                  style={s.btnGhost}
+                  disabled={logsPage === 0 || loadingLogs}
+                  onClick={() => fetchLogs(logsUserId, logsPage - 1)}
+                >
+                  ← Anterior
+                </button>
+                <span style={s.muted}>
+                  Página {logsPage + 1} de {Math.ceil(logsTotal / PAGE_SIZE)}
+                  {' '}({logsTotal} registros)
+                </span>
+                <button
+                  style={s.btnGhost}
+                  disabled={(logsPage + 1) * PAGE_SIZE >= logsTotal || loadingLogs}
+                  onClick={() => fetchLogs(logsUserId, logsPage + 1)}
+                >
+                  Siguiente →
+                </button>
+              </div>
+            )}
+            {logsTotal <= PAGE_SIZE && (
+              <p style={{ ...s.muted, fontSize: '0.78rem', marginTop: 8 }}>
+                {logsTotal} registro{logsTotal !== 1 ? 's' : ''}
+              </p>
+            )}
+          </>
+        )}
+
+        {logsUserId && !loadingLogs && logs.length === 0 && (
+          <p style={{ ...s.muted, marginTop: 12 }}>Sin logs para este usuario.</p>
         )}
       </section>
 
@@ -406,5 +540,23 @@ const s: Record<string, React.CSSProperties> = {
     color: '#7A6A50',
     fontSize: '0.9rem',
     margin: 0,
+  },
+  select: {
+    padding: '8px 12px',
+    border: '1.5px solid #C5B89A',
+    borderRadius: 6,
+    fontSize: '0.88rem',
+    color: '#2A2010',
+    background: '#fff',
+    fontFamily: 'inherit',
+    cursor: 'pointer',
+    minWidth: 220,
+  },
+  code: {
+    fontFamily: 'monospace',
+    fontSize: '0.82rem',
+    background: '#EDE5D0',
+    padding: '1px 5px',
+    borderRadius: 3,
   },
 };

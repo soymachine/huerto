@@ -285,6 +285,32 @@ export async function saveReminder(userId: string, email: string, enabled: boole
   );
 }
 
+// ─── Logs ─────────────────────────────────────────────────────────────────────
+
+export type LogAction =
+  | 'plant_set'     | 'plant_remove' | 'plant_move'
+  | 'date_set'      | 'note_set'
+  | 'row_insert'    | 'row_delete'
+  | 'col_insert'    | 'col_delete'
+  | 'garden_create' | 'garden_rename' | 'garden_delete'
+  | 'season_copy'   | 'undo'          | 'redo'
+  | 'export_image';
+
+/** Fire-and-forget — never throws, never blocks the UI. */
+export function insertLog(
+  userId:   string,
+  action:   LogAction,
+  meta:     Record<string, unknown> = {},
+  gardenId: string | null = null,
+): void {
+  supabase.from('logs').insert({
+    user_id:   userId,
+    garden_id: gardenId,
+    action,
+    meta,
+  }).then(() => {/* silent */}, () => {/* silent */});
+}
+
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 export function plantingsToGardenData(plantings: Planting[]): GardenData {
