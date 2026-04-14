@@ -479,7 +479,7 @@ function OrchardInner() {
         </div>
       )}
 
-      <footer className="app-version">v1.5</footer>
+      <footer className="app-version">v1.6</footer>
 
     </div>
   );
