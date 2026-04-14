@@ -47,7 +47,7 @@ function OrchardInner() {
     cols,   setCols,
     rows,   setRows,
     ready,  syncing,
-    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
+    setCell, setNote, setDate, moveCell, copySeason, copyAllToGarden, insertRow, insertCol, deleteRow, deleteCol,
     undo, redo, canUndo, canRedo,
   } = useGardenData();
 
@@ -57,6 +57,11 @@ function OrchardInner() {
   const [showAssociations, setShowAssociations] = useState(false);
   const [showAssocTable,   setShowAssocTable]   = useState(false);
   const [exportingImg,     setExportingImg]     = useState(false);
+  const [showCopyModal,    setShowCopyModal]    = useState(false);
+  const [copyTargetId,     setCopyTargetId]     = useState<string>('');
+  const [copyTargetSeason, setCopyTargetSeason] = useState<'summer' | 'winter'>('summer');
+  const [copyTargetYear,   setCopyTargetYear]   = useState(new Date().getFullYear());
+  const [copyMsg,          setCopyMsg]          = useState<string>('');
   const gridRef = useRef<HTMLDivElement>(null);
 
   // ── Previous season data ───────────────────────────────────────────────────
@@ -71,6 +76,26 @@ function OrchardInner() {
     await copySeason();
   };
 
+  const openCopyModal = () => {
+    // Default target: other gardens first, or same garden other season
+    const other = gardens.find(g => g.id !== activeGardenId);
+    setCopyTargetId(other?.id ?? activeGardenId ?? '');
+    setCopyTargetSeason(season === 'summer' ? 'winter' : 'summer');
+    setCopyTargetYear(year);
+    setCopyMsg('');
+    setShowCopyModal(true);
+  };
+
+  const handleCopyToGarden = async () => {
+    if (!copyTargetId) return;
+    const count = await copyAllToGarden(copyTargetId, copyTargetYear, copyTargetSeason);
+    if (count === 0) {
+      setCopyMsg(t.copyToGardenEmpty);
+    } else {
+      setCopyMsg(t.copyToGardenOk(count));
+    }
+  };
+
   // ── Winter body class ─────────────────────────────────────────────────────
   useEffect(() => {
     document.body.classList.toggle('winter', season === 'winter');
@@ -79,7 +104,7 @@ function OrchardInner() {
   // ── Escape key ────────────────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') { setActiveCell(null); setShowAuthModal(false); setShowAssocTable(false); }
+      if (e.key === 'Escape') { setActiveCell(null); setShowAuthModal(false); setShowAssocTable(false); setShowCopyModal(false); }
     };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
@@ -292,6 +317,10 @@ function OrchardInner() {
             {view === 'garden' && hasPrevData && (
               <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
             )}
+            {/* Copy all to another garden — only in garden view when there are plants */}
+            {view === 'garden' && gardens.length > 0 && (
+              <button className="copy-season-btn icon-only" onClick={openCopyModal} title={t.copyToGarden}>⊕</button>
+            )}
 
             {/* Calendar tab: icon+label when active, icon-only when not */}
             <button
@@ -396,6 +425,58 @@ function OrchardInner() {
       {/* ── Associations table overlay ── */}
       {showAssocTable && (
         <AssociationsTable onClose={() => setShowAssocTable(false)} />
+      )}
+
+      {/* ── Copy to garden modal ── */}
+      {showCopyModal && (
+        <div className="overlay open" onClick={e => { if (e.target === e.currentTarget) setShowCopyModal(false); }}>
+          <div className="modal" style={{ maxWidth: 380 }}>
+            <h2 className="modal-title">{t.copyToGardenTitle}</h2>
+
+            <label className="modal-label">{t.copyToGardenTarget}</label>
+            <select
+              className="modal-select"
+              value={copyTargetId}
+              onChange={e => setCopyTargetId(e.target.value)}
+            >
+              {gardens.map(g => (
+                <option key={g.id} value={g.id}>{g.name}</option>
+              ))}
+            </select>
+
+            <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenSeason}</label>
+            <div className="season-row" style={{ marginBottom: 0 }}>
+              <button
+                className={`season-btn${copyTargetSeason === 'summer' ? ' active' : ''}`}
+                onClick={() => setCopyTargetSeason('summer')}
+              >☀️ {t.summer}</button>
+              <button
+                className={`season-btn${copyTargetSeason === 'winter' ? ' active' : ''}`}
+                onClick={() => setCopyTargetSeason('winter')}
+              >❄️ {t.winter}</button>
+            </div>
+
+            <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenYear}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button className="year-btn" onClick={() => setCopyTargetYear(y => y - 1)}>‹</button>
+              <span style={{ fontWeight: 600, minWidth: 40, textAlign: 'center' }}>{copyTargetYear}</span>
+              <button className="year-btn" onClick={() => setCopyTargetYear(y => y + 1)}>›</button>
+            </div>
+
+            {copyMsg && (
+              <p style={{ marginTop: 12, fontSize: '0.88rem', color: copyMsg === t.copyToGardenEmpty ? '#B04A28' : '#3A6020' }}>
+                {copyMsg}
+              </p>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
+              <button className="modal-cancel-btn" onClick={() => setShowCopyModal(false)}>{t.cancel}</button>
+              <button className="modal-confirm-btn" onClick={handleCopyToGarden} disabled={!copyTargetId}>
+                {t.copyToGardenDo}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       <footer className="app-version">v1.5</footer>

@@ -805,6 +805,59 @@ body.winter {
   cursor: not-allowed;
 }
 
+/* ── Copy-to-garden modal helpers ── */
+.modal-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+  margin-top: 4px;
+}
+.modal-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1.5px solid var(--bg-dark);
+  border-radius: var(--radius);
+  background: var(--bg);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.modal-select:focus { border-color: var(--green); }
+.modal-confirm-btn {
+  padding: 9px 20px;
+  background: var(--green);
+  border: none;
+  border-radius: var(--radius);
+  color: #fff;
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.03em;
+}
+.modal-confirm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.modal-confirm-btn:hover:not(:disabled) { background: var(--green-dark, #2d4c18); }
+.modal-cancel-btn {
+  padding: 8px 18px;
+  background: transparent;
+  border: 1.5px solid var(--bg-dark);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: 'Lato', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.modal-cancel-btn:hover { background: var(--bg-mid); }
+
 /* ─── MODAL WIDE ─── */
 .modal-wide {
   width: min(860px, 96vw);

@@ -485,6 +485,43 @@ export function useGardenData() {
     return true;
   }, [gardenData, year, season, user, log]);
 
+  // ── Copy all to another garden ────────────────────────────────────────────────
+  // Copies the current season's plantings to targetGardenId / targetYear / targetSeason.
+  // Returns the number of cells copied (0 means nothing to copy).
+  const copyAllToGarden = useCallback(async (
+    targetGardenId: string,
+    targetYear:     number,
+    targetSeason:   Season,
+  ): Promise<number> => {
+    const sk       = `${year}-${season}`;
+    const fromData = gardenData[sk];
+    if (!fromData || Object.keys(fromData).length === 0) return 0;
+    const count = Object.keys(fromData).length;
+
+    if (user) {
+      setSyncing(true);
+      try {
+        await bulkUpsertPlantings(targetGardenId, targetYear, targetSeason, fromData);
+        log('season_copy', {
+          target_garden: targetGardenId,
+          target_year:   targetYear,
+          target_season: targetSeason,
+          count,
+        });
+      } finally {
+        setSyncing(false);
+      }
+    }
+
+    // If target is the active garden, update local state immediately
+    if (targetGardenId === activeIdRef.current) {
+      const toKey = `${targetYear}-${targetSeason}`;
+      setGardenData(prev => ({ ...prev, [toKey]: { ...fromData } }));
+    }
+
+    return count;
+  }, [gardenData, year, season, user, log]);
+
   // ── Grid size operations ──────────────────────────────────────────────────────
   const handleSetCols = async (newCols: number) => {
     setCols(newCols);
@@ -653,7 +690,7 @@ export function useGardenData() {
     rows,   setRows: handleSetRows,
     ready,
     syncing: syncing || switching,
-    setCell, setNote, setDate, moveCell, copySeason, insertRow, insertCol, deleteRow, deleteCol,
+    setCell, setNote, setDate, moveCell, copySeason, copyAllToGarden, insertRow, insertCol, deleteRow, deleteCol,
     // Undo / redo
     undo, redo, canUndo, canRedo,
   };

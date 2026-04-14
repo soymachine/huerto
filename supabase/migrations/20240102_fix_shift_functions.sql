@@ -1,5 +1,7 @@
--- Run these in Supabase SQL Editor (Dashboard → SQL Editor → New query)
--- Or apply via supabase/migrations/20240102_fix_shift_functions.sql
+-- Fix shift_garden_rows / shift_garden_cols: add p_from_idx support.
+-- Previously these functions shifted ALL rows/cols regardless of position,
+-- causing insert row/col to corrupt data (plants before the insertion point
+-- would shift too). Now only rows/cols >= p_from_idx are shifted.
 
 CREATE OR REPLACE FUNCTION shift_garden_rows(
   p_garden_id uuid,
