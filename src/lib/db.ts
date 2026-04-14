@@ -260,11 +260,46 @@ export async function deleteGardenColData(gardenId: string, colIdx: number): Pro
 // ─── Grid shift (insert row/col at top/left) ──────────────────────────────────
 
 export async function shiftGardenRows(gardenId: string, delta: number, fromIdx = 0): Promise<void> {
-  await supabase.rpc('shift_garden_rows', { p_garden_id: gardenId, p_delta: delta, p_from_idx: fromIdx });
+  // Read rows that need shifting
+  const [{ data: plantings }, { data: notes }] = await Promise.all([
+    supabase.from('plantings').select('*').eq('garden_id', gardenId).gte('row_idx', fromIdx),
+    supabase.from('notes').select('*').eq('garden_id', gardenId).gte('row_idx', fromIdx),
+  ]);
+  if (!plantings?.length && !notes?.length) return;
+
+  // Delete originals
+  await Promise.all([
+    plantings?.length ? supabase.from('plantings').delete().eq('garden_id', gardenId).gte('row_idx', fromIdx) : Promise.resolve(),
+    notes?.length     ? supabase.from('notes').delete().eq('garden_id', gardenId).gte('row_idx', fromIdx)     : Promise.resolve(),
+  ]);
+
+  // Re-insert with shifted indices
+  const newPlantings = (plantings ?? []).map(p => ({ ...p, row_idx: p.row_idx + delta }));
+  const newNotes     = (notes     ?? []).map(n => ({ ...n, row_idx: n.row_idx + delta }));
+  await Promise.all([
+    newPlantings.length ? supabase.from('plantings').insert(newPlantings) : Promise.resolve(),
+    newNotes.length     ? supabase.from('notes').insert(newNotes)         : Promise.resolve(),
+  ]);
 }
 
 export async function shiftGardenCols(gardenId: string, delta: number, fromIdx = 0): Promise<void> {
-  await supabase.rpc('shift_garden_cols', { p_garden_id: gardenId, p_delta: delta, p_from_idx: fromIdx });
+  const [{ data: plantings }, { data: notes }] = await Promise.all([
+    supabase.from('plantings').select('*').eq('garden_id', gardenId).gte('col_idx', fromIdx),
+    supabase.from('notes').select('*').eq('garden_id', gardenId).gte('col_idx', fromIdx),
+  ]);
+  if (!plantings?.length && !notes?.length) return;
+
+  await Promise.all([
+    plantings?.length ? supabase.from('plantings').delete().eq('garden_id', gardenId).gte('col_idx', fromIdx) : Promise.resolve(),
+    notes?.length     ? supabase.from('notes').delete().eq('garden_id', gardenId).gte('col_idx', fromIdx)     : Promise.resolve(),
+  ]);
+
+  const newPlantings = (plantings ?? []).map(p => ({ ...p, col_idx: p.col_idx + delta }));
+  const newNotes     = (notes     ?? []).map(n => ({ ...n, col_idx: n.col_idx + delta }));
+  await Promise.all([
+    newPlantings.length ? supabase.from('plantings').insert(newPlantings) : Promise.resolve(),
+    newNotes.length     ? supabase.from('notes').insert(newNotes)         : Promise.resolve(),
+  ]);
 }
 
 // ─── Reminders ────────────────────────────────────────────────────────────────
