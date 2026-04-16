@@ -70,14 +70,15 @@ export interface Translations {
   copySeasonLabel:    string;
   copySeasonConfirm:  (prevLabel: string) => string;
   // Copy all to garden
-  copyToGarden:       string;
-  copyToGardenTitle:  string;
-  copyToGardenTarget: string;
-  copyToGardenSeason: string;
-  copyToGardenYear:   string;
-  copyToGardenDo:     string;
-  copyToGardenOk:     (count: number) => string;
-  copyToGardenEmpty:  string;
+  copyToGarden:          string;
+  copyToGardenTitle:     string;
+  copyToGardenTarget:    string;
+  copyToGardenSeason:    string;
+  copyToGardenYear:      string;
+  copyToGardenWithNotes: string;
+  copyToGardenDo:        string;
+  copyToGardenOk:        (count: number) => string;
+  copyToGardenEmpty:     string;
   // Config panel
   settings:           string;
   language:           string;
@@ -202,14 +203,15 @@ const ES: Translations = {
   copySeason:         'Copiar temporada',
   copySeasonLabel:    'Anterior',
   copySeasonConfirm:  prev => `¿Copiar el plan de ${prev} a esta temporada? Se sobreescribirá lo que haya ahora.`,
-  copyToGarden:       'Copiar a otro huerto',
-  copyToGardenTitle:  'Copiar temporada a otro huerto',
-  copyToGardenTarget: 'Huerto destino',
-  copyToGardenSeason: 'Temporada destino',
-  copyToGardenYear:   'Año',
-  copyToGardenDo:     'Copiar',
-  copyToGardenOk:     n => `${n} planta${n !== 1 ? 's' : ''} copiada${n !== 1 ? 's' : ''} correctamente.`,
-  copyToGardenEmpty:  'No hay plantas en esta temporada para copiar.',
+  copyToGarden:          'Copiar a otro huerto',
+  copyToGardenTitle:     'Copiar temporada a otro huerto',
+  copyToGardenTarget:    'Huerto destino',
+  copyToGardenSeason:    'Temporada destino',
+  copyToGardenYear:      'Año',
+  copyToGardenWithNotes: 'Copiar también las notas',
+  copyToGardenDo:        'Copiar',
+  copyToGardenOk:        n => `${n} planta${n !== 1 ? 's' : ''} copiada${n !== 1 ? 's' : ''} correctamente.`,
+  copyToGardenEmpty:     'No hay plantas en esta temporada para copiar.',
   settings:           'Configuración',
   language:           'Idioma',
   plantingDate:       'Fecha de plantación',
@@ -322,14 +324,15 @@ const EN: Translations = {
   copySeason:         'Copy season',
   copySeasonLabel:    'Previous',
   copySeasonConfirm:  prev => `Copy the plan from ${prev} to this season? Current plantings will be overwritten.`,
-  copyToGarden:       'Copy to another garden',
-  copyToGardenTitle:  'Copy season to another garden',
-  copyToGardenTarget: 'Target garden',
-  copyToGardenSeason: 'Target season',
-  copyToGardenYear:   'Year',
-  copyToGardenDo:     'Copy',
-  copyToGardenOk:     n => `${n} plant${n !== 1 ? 's' : ''} copied successfully.`,
-  copyToGardenEmpty:  'No plants in this season to copy.',
+  copyToGarden:          'Copy to another garden',
+  copyToGardenTitle:     'Copy season to another garden',
+  copyToGardenTarget:    'Target garden',
+  copyToGardenSeason:    'Target season',
+  copyToGardenYear:      'Year',
+  copyToGardenWithNotes: 'Copy notes too',
+  copyToGardenDo:        'Copy',
+  copyToGardenOk:        n => `${n} plant${n !== 1 ? 's' : ''} copied successfully.`,
+  copyToGardenEmpty:     'No plants in this season to copy.',
   settings:           'Settings',
   language:           'Language',
   plantingDate:       'Planting date',

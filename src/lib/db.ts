@@ -245,6 +245,22 @@ export async function bulkUpsertPlantings(
   await supabase.from('plantings').upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
 }
 
+export async function bulkUpsertNotes(
+  gardenId: string,
+  year: number,
+  season: string,
+  cells: Record<string, string>, // cellKey "r,c" → content
+): Promise<void> {
+  const inserts = Object.entries(cells)
+    .filter(([, content]) => content.trim())
+    .map(([ck, content]) => {
+      const [r, c] = ck.split(',').map(Number);
+      return { garden_id: gardenId, year, season, row_idx: r, col_idx: c, content };
+    });
+  if (inserts.length === 0) return;
+  await supabase.from('notes').upsert(inserts, { onConflict: 'garden_id,year,season,row_idx,col_idx' });
+}
+
 // ─── Grid delete row/col data ─────────────────────────────────────────────────
 
 export async function deleteGardenRowData(gardenId: string, rowIdx: number): Promise<void> {

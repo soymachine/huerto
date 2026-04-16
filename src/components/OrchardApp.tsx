@@ -61,6 +61,7 @@ function OrchardInner() {
   const [copyTargetId,     setCopyTargetId]     = useState<string>('');
   const [copyTargetSeason, setCopyTargetSeason] = useState<'summer' | 'winter'>('summer');
   const [copyTargetYear,   setCopyTargetYear]   = useState(new Date().getFullYear());
+  const [copyNotes,        setCopyNotes]        = useState(true);
   const [copyMsg,          setCopyMsg]          = useState<string>('');
   const [copying,          setCopying]          = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -92,7 +93,7 @@ function OrchardInner() {
     setCopying(true);
     setCopyMsg('');
     try {
-      const count = await copyAllToGarden(copyTargetId, copyTargetYear, copyTargetSeason);
+      const count = await copyAllToGarden(copyTargetId, copyTargetYear, copyTargetSeason, copyNotes);
       if (count === 0) {
         setCopyMsg(t.copyToGardenEmpty);
       } else {
@@ -320,11 +321,7 @@ function OrchardInner() {
               )}
             </div>
 
-            {/* Copy season — only in garden view */}
-            {view === 'garden' && hasPrevData && (
-              <button className="copy-season-btn icon-only" onClick={handleCopySeason} title={`${t.copySeason} ← ${prevSeasonLabel}`}>⬆</button>
-            )}
-            {/* Copy all to another garden — only in garden view when there are plants */}
+            {/* Copy to another garden — only in garden view */}
             {view === 'garden' && gardens.length > 0 && (
               <button className="copy-season-btn icon-only" onClick={openCopyModal} title={t.copyToGarden}>⊕</button>
             )}
@@ -451,6 +448,13 @@ function OrchardInner() {
               ))}
             </select>
 
+            <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenYear}</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <button className="year-btn" onClick={() => setCopyTargetYear(y => y - 1)}>‹</button>
+              <span style={{ fontWeight: 600, minWidth: 40, textAlign: 'center' }}>{copyTargetYear}</span>
+              <button className="year-btn" onClick={() => setCopyTargetYear(y => y + 1)}>›</button>
+            </div>
+
             <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenSeason}</label>
             <div className="season-row" style={{ marginBottom: 0 }}>
               <button
@@ -463,12 +467,14 @@ function OrchardInner() {
               >❄️ {t.winter}</button>
             </div>
 
-            <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenYear}</label>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <button className="year-btn" onClick={() => setCopyTargetYear(y => y - 1)}>‹</button>
-              <span style={{ fontWeight: 600, minWidth: 40, textAlign: 'center' }}>{copyTargetYear}</span>
-              <button className="year-btn" onClick={() => setCopyTargetYear(y => y + 1)}>›</button>
-            </div>
+            <label className="modal-checkbox-row" style={{ marginTop: 14 }}>
+              <input
+                type="checkbox"
+                checked={copyNotes}
+                onChange={e => setCopyNotes(e.target.checked)}
+              />
+              {t.copyToGardenWithNotes}
+            </label>
 
             {copyMsg && (
               <p style={{ marginTop: 12, fontSize: '0.88rem', color: copyMsg === t.copyToGardenEmpty ? '#B04A28' : '#3A6020' }}>
@@ -486,7 +492,7 @@ function OrchardInner() {
         </div>
       )}
 
-      <footer className="app-version">v1.8</footer>
+      <footer className="app-version">v1.9</footer>
 
     </div>
   );

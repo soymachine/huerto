@@ -13,7 +13,7 @@ import {
   createGarden  as dbCreateGarden,
   renameGarden  as dbRenameGarden,
   deleteGarden  as dbDeleteGarden,
-  loadPlantings, upsertPlanting, removePlanting, bulkUpsertPlantings,
+  loadPlantings, upsertPlanting, removePlanting, bulkUpsertPlantings, bulkUpsertNotes,
   migrateLocalData, migrateLocalNotes,
   updateGardenSize, plantingsToGardenData, plantingsToDatesData,
   fetchNotes, upsertNote, dbNotesToNotesData,
@@ -493,42 +493,46 @@ export function useGardenData() {
     targetGardenId: string,
     targetYear:     number,
     targetSeason:   Season,
+    withNotes:      boolean,
   ): Promise<number> => {
     const sk       = `${year}-${season}`;
     const fromData = gardenData[sk];
     if (!fromData || Object.keys(fromData).length === 0) return 0;
-    const count = Object.keys(fromData).length;
+    const count     = Object.keys(fromData).length;
+    const fromNotes = notesData[sk] ?? {};
 
     if (user) {
       setSyncing(true);
       try {
         await bulkUpsertPlantings(targetGardenId, targetYear, targetSeason, fromData);
-        // Resize destination garden to match source
+        if (withNotes && Object.keys(fromNotes).length > 0) {
+          await bulkUpsertNotes(targetGardenId, targetYear, targetSeason, fromNotes);
+        }
         await updateGardenSize(targetGardenId, cols, rows);
         log('season_copy', {
           target_garden: targetGardenId,
           target_year:   targetYear,
           target_season: targetSeason,
           count,
+          with_notes: withNotes,
         });
       } finally {
         setSyncing(false);
       }
     }
 
-    // Update garden list to reflect new size of target
     setGardens(prev => prev.map(g => g.id === targetGardenId ? { ...g, cols, rows } : g));
 
-    // If target is the active garden, update local state immediately
     if (targetGardenId === activeIdRef.current) {
       const toKey = `${targetYear}-${targetSeason}`;
       setGardenData(prev => ({ ...prev, [toKey]: { ...fromData } }));
-      setCols(cols);
-      setRows(rows);
+      if (withNotes && Object.keys(fromNotes).length > 0) {
+        setNotesData(prev => ({ ...prev, [toKey]: { ...fromNotes } }));
+      }
     }
 
     return count;
-  }, [gardenData, year, season, user, cols, rows, log]);
+  }, [gardenData, notesData, year, season, user, cols, rows, log]);
 
   // ── Grid size operations ──────────────────────────────────────────────────────
   const handleSetCols = async (newCols: number) => {
