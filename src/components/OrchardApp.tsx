@@ -458,10 +458,12 @@ function OrchardInner() {
             <label className="modal-label" style={{ marginTop: 14 }}>{t.copyToGardenSeason}</label>
             <div className="season-row" style={{ marginBottom: 0 }}>
               <button
+                data-s="summer"
                 className={`season-btn${copyTargetSeason === 'summer' ? ' active' : ''}`}
                 onClick={() => setCopyTargetSeason('summer')}
               >☀️ {t.summer}</button>
               <button
+                data-s="winter"
                 className={`season-btn${copyTargetSeason === 'winter' ? ' active' : ''}`}
                 onClick={() => setCopyTargetSeason('winter')}
               >❄️ {t.winter}</button>
@@ -492,7 +494,7 @@ function OrchardInner() {
         </div>
       )}
 
-      <footer className="app-version">v1.9</footer>
+      <footer className="app-version">v2.0</footer>
 
     </div>
   );
