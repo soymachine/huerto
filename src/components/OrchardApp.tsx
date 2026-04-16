@@ -62,6 +62,7 @@ function OrchardInner() {
   const [copyTargetSeason, setCopyTargetSeason] = useState<'summer' | 'winter'>('summer');
   const [copyTargetYear,   setCopyTargetYear]   = useState(new Date().getFullYear());
   const [copyMsg,          setCopyMsg]          = useState<string>('');
+  const [copying,          setCopying]          = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
 
   // ── Previous season data ───────────────────────────────────────────────────
@@ -87,12 +88,18 @@ function OrchardInner() {
   };
 
   const handleCopyToGarden = async () => {
-    if (!copyTargetId) return;
-    const count = await copyAllToGarden(copyTargetId, copyTargetYear, copyTargetSeason);
-    if (count === 0) {
-      setCopyMsg(t.copyToGardenEmpty);
-    } else {
-      setCopyMsg(t.copyToGardenOk(count));
+    if (!copyTargetId || copying) return;
+    setCopying(true);
+    setCopyMsg('');
+    try {
+      const count = await copyAllToGarden(copyTargetId, copyTargetYear, copyTargetSeason);
+      if (count === 0) {
+        setCopyMsg(t.copyToGardenEmpty);
+      } else {
+        setShowCopyModal(false);
+      }
+    } finally {
+      setCopying(false);
     }
   };
 
@@ -470,16 +477,16 @@ function OrchardInner() {
             )}
 
             <div style={{ display: 'flex', gap: 10, marginTop: 20, justifyContent: 'flex-end' }}>
-              <button className="modal-cancel-btn" onClick={() => setShowCopyModal(false)}>{t.cancel}</button>
-              <button className="modal-confirm-btn" onClick={handleCopyToGarden} disabled={!copyTargetId}>
-                {t.copyToGardenDo}
+              <button className="modal-cancel-btn" onClick={() => setShowCopyModal(false)} disabled={copying}>{t.cancel}</button>
+              <button className="modal-confirm-btn" onClick={handleCopyToGarden} disabled={!copyTargetId || copying}>
+                {copying ? '…' : t.copyToGardenDo}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <footer className="app-version">v1.7</footer>
+      <footer className="app-version">v1.8</footer>
 
     </div>
   );

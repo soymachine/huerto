@@ -486,7 +486,8 @@ export function useGardenData() {
   }, [gardenData, year, season, user, log]);
 
   // ── Copy all to another garden ────────────────────────────────────────────────
-  // Copies the current season's plantings to targetGardenId / targetYear / targetSeason.
+  // Copies the current season's plantings to targetGardenId / targetYear / targetSeason
+  // and resizes the destination garden to match the source.
   // Returns the number of cells copied (0 means nothing to copy).
   const copyAllToGarden = useCallback(async (
     targetGardenId: string,
@@ -502,6 +503,8 @@ export function useGardenData() {
       setSyncing(true);
       try {
         await bulkUpsertPlantings(targetGardenId, targetYear, targetSeason, fromData);
+        // Resize destination garden to match source
+        await updateGardenSize(targetGardenId, cols, rows);
         log('season_copy', {
           target_garden: targetGardenId,
           target_year:   targetYear,
@@ -513,14 +516,19 @@ export function useGardenData() {
       }
     }
 
+    // Update garden list to reflect new size of target
+    setGardens(prev => prev.map(g => g.id === targetGardenId ? { ...g, cols, rows } : g));
+
     // If target is the active garden, update local state immediately
     if (targetGardenId === activeIdRef.current) {
       const toKey = `${targetYear}-${targetSeason}`;
       setGardenData(prev => ({ ...prev, [toKey]: { ...fromData } }));
+      setCols(cols);
+      setRows(rows);
     }
 
     return count;
-  }, [gardenData, year, season, user, log]);
+  }, [gardenData, year, season, user, cols, rows, log]);
 
   // ── Grid size operations ──────────────────────────────────────────────────────
   const handleSetCols = async (newCols: number) => {
